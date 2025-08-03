@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>烧烤社区管理系统 - 测试版</title>
+    <!-- 外部资源引用 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <!-- 配置Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF6B35', // 与用户端端保持一致的橙色主题
+                        secondary: '#6B7280',
+                        success: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        dark: '#1F2937',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .sidebar-item {
+                @apply flex items-center px-4 py-3 text-gray-600 hover:bg-primary/10 hover:text-primary transition-all duration-200 cursor-pointer;
+            }
+            .sidebar-item.active {
+                @apply bg-primary/10 text-primary border-l-4 border-primary;
+            }
+            .card {
+                @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+            }
+            .btn {
+                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center;
+            }
+            .btn-primary {
+                @apply bg-primary text-white hover:bg-primary/90;
+            }
+            .btn-success {
+                @apply bg-success text-white hover:bg-success/90;
+            }
+            .btn-danger {
+                @apply bg-danger text-white hover:bg-danger/90; /* 修复了此处的笔误 */
+            }
+            .btn-secondary {
+                @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+            }
+            .status-badge {
+                @apply text-xs px-2 py-1 rounded-full font-medium;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 min-h-screen">
+    <!-- 管理后台页面 (直接显示) -->
+    <div id="adminPage" class="flex h-screen overflow-hidden">
+        <!-- 侧边栏 -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+            <div class="p-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-3">
+                        <i class="fa fa-fire"></i>
+                    </div>
+                    <h1 class="font-bold text-lg">烧烤社区管理</h1>
+                    <span class="ml-2 text-xs bg-warning/10 text-warning px-2 py-0.5 rounded-full">测试版</span>
+                </div>
+            </div>
+            
+            <nav class="py-2">
+                <div class="sidebar-item active" data-target="dashboard">
+                    <i class="fa fa-dashboard w-5 text-center mr-3"></i>
+                    <span>数据概览</span>
+                </div>
+                <div class="sidebar-item" data-target="content">
+                    <i class="fa fa-list-alt w-5 text-center mr-3"></i>
+                    <span>内容管理</span>
+                </div>
+                <div class="sidebar-item" data-target="users">
+                    <i class="fa fa-users w-5 text-center mr-3"></i>
+                    <span>用户管理</span>
+                </div>
+                <!-- 测试阶段添加的内部操作菜单 -->
+                <div class="sidebar-item" data-target="testTools">
+                    <i class="fa fa-wrench w-5 text-center mr-3"></i>
+                    <span>测试工具</span>
+                </div>
+            </nav>
+            
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+                <div class="flex items-center">
+                    <img src="https://picsum.photos/id/1005/40/40" alt="管理员头像" class="w-8 h-8 rounded-full object-cover mr-3">
+                    <div>
+                        <div class="text-sm font-medium" id="currentAdminName">管理员</div>
+                        <div class="text-xs text-gray-500">测试模式</div>
+                    </div>
+                    <button id="logoutBtn" class="ml-auto text-gray-500 hover:text-danger">
+                        <i class="fa fa-sign-out"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- 顶部导航 -->
+            <header class="bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+                <h2 class="text-lg font-bold" id="pageTitle">数据概览</h2>
+                <div class="flex items-center">
+                    <div class="relative mr-4">
+                        <input type="text" placeholder="搜索..." class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary w-48">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <div class="text-gray-500">
+                        <i class="fa fa-bell-o text-xl"></i>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- 页面内容容器 -->
+            <div class="flex-1 overflow-y-auto p-6" id="pageContent">
+                <!-- 数据概览页面 -->
+                <div id="dashboardContent">
+                    <div class="bg-warning/10 border border-warning/20 rounded-lg p-4 mb-6 flex items-center">
+                        <i class="fa fa-info-circle text-warning mr-3 text-xl"></i>
+                        <div>
+                            <p class="font-medium text-warning">测试模式提示</p>
+                            <p class="text-sm text-gray-600">当前为测试阶段，所有操作不会影响真实数据</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="card p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">总用户数</p>
+                                    <h3 class="text-3xl font-bold mt-1" id="totalUsers">128</h3>
+                                    <p class="text-success text-xs mt-2 flex items-center">
+                                        <i class="fa fa-arrow-up mr-1"></i> 12% 较上周
+                                    </p>
+                                </div>
+                                <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                    <i class="fa fa-users text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">总分享数</p>
+                                    <h3 class="text-3xl font-bold mt-1" id="totalPosts">356</h3>
+                                    <p class="text-success text-xs mt-2 flex items-center">
+                                        <i class="fa fa-arrow-up mr-1"></i> 8% 较上周
+                                    </p>
+                                </div>
+                                <div class="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center text-success">
+                                    <i class="fa fa-commenting-o text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">待审核</p>
+                                    <h3 class="text-3xl font-bold mt-1" id="pendingPosts">24</h3>
+                                    <p class="text-danger text-xs mt-2 flex items-center">
+                                        <i class="fa fa-arrow-up mr-1"></i> 5% 较上周
+                                    </p>
+                                </div>
+                                <div class="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+                                    <i class="fa fa-clock-o text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500 text-sm">今日活跃</p>
+                                    <h3 class="text-3xl font-bold mt-1" id="todayActive">42</h3>
+                                    <p class="text-success text-xs mt-2 flex items-center">
+                                        <i class="fa fa-arrow-up mr-1"></i> 15% 较昨日
+                                    </p>
+                                </div>
+                                <div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                                    <i class="fa fa-line-chart text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="card p-5 lg:col-span-2">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="font-bold">用户活跃度趋势</h3>
+                                <div class="flex space-x-2">
+                                    <button class="text-xs px-3 py-1 bg-primary/10 text-primary rounded-full">周</button>
+                                    <button class="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-full">月</button>
+                                    <button class="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-full">年</button>
+                                </div>
+                            </div>
+                            <div class="h-64">
+                                <canvas id="activityChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-5">
+                            <h3 class="font-bold mb-6">内容状态分布</h3>
+                            <div class="h-64">
+                                <canvas id="contentChart"></canvas>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 mt-4">
+                                <div class="text-center">
+                                    <div class="text-success font-bold">65%</div>
+                                    <div class="text-xs text-gray-500">已展示</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-warning font-bold">20%</div>
+                                    <div class="text-xs text-gray-500">待审核</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-danger font-bold">15%</div>
+                                    <div class="text-xs text-gray-500">已拒绝</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-5">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold">热门分享</h3>
+                            <button class="text-primary text-sm flex items-center" data-target="content">
+                                查看全部 <i class="fa fa-angle-right ml-1"></i>
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                        <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">店铺名称</th>
+                                        <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">发布者</th>
+                                        <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">点赞数</th>
+                                        <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                        <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="py-3 px-4 text-sm">#1258</td>
+                                        <td class="py-3 px-4 text-sm">老地方烧烤</td>
+                                        <td class="py-3 px-4 text-sm">user_8745</td>
+                                        <td class="py-3 px-4 text-sm">128</td>
+                                        <td class="py-3 px-4">
+                                            <span class="status-badge bg-success/10 text-success">已展示</span>
+                                        </td>
+                                        <td class="py-3 px-4 text-sm">
+                                            <button class="text-primary hover:text-primary/80 view-post" data-id="1258">查看</button>
+                                            <span class="mx-2 text-gray-300">|</span>
+                                            <button class="text-danger hover:text-danger/80 delete-post" data-id="1258">删除</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-sm">#1245</td>
+                                        <td class="py-3 px-4 text-sm">东北烧烤王</td>
+                                        <td class="py-3 px-4 text-sm">user_2156</td>
+                                        <td class="py-3 px-4 text-sm">96</td>
+                                        <td class="py-3 px-4">
+                                            <span class="status-badge bg-success/10 text-success">已展示</span>
+                                        </td>
+                                        <td class="py-3 px-4 text-sm">
+                                            <button class="text-primary hover:text-primary/80 view-post" data-id="1245">查看</button>
+                                            <span class="mx-2 text-gray-300">|</span>
+                                            <button class="text-danger hover:text-danger/80 delete-post" data-id="1245">删除</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 text-sm">#1236</td>
+                                        <td class="py-3 px-4 text-sm">小李烤串</td>
+                                        <td class="py-3 px-4 text-sm">user_6325</td>
+                                        <td class="py-3 px-4 text-sm">75</td>
+                                        <td class="py-3 px-4">
+                                            <span class="status-badge bg-success/10 text-success">已展示</span>
+                                        </td>
+                                        <td class="py-3 px-4 text-sm">
+                                            <button class="text-primary hover:text-primary/80 view-post" data-id="1236">查看</button>
+                                            <span class="mx-2 text-gray-300">|</span>
+                                            <button class="text-danger hover:text-danger/80 delete-post" data-id="1236">删除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 内容管理页面 -->
+                <div id="contentContent" class="hidden">
+                    <div class="card mb-6">
+                        <div class="p-5 border-b border-gray-200">
+                            <h3 class="font-bold">内容管理</h3>
+                            <p class="text-gray-500 text-sm mt-1">审核和管理用户发布的分享内容</p>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="status-filter-btn btn btn-primary" data-status="all">
+                                        全部内容
+                                    </button>
+                                    <button class="status-filter-btn btn btn-secondary" data-status="pending">
+                                        待审核
+                                    </button>
+                                    <button class="status-filter-btn btn btn-secondary" data-status="approved">
+                                        已展示
+                                    </button>
+                                    <button class="status-filter-btn btn btn-secondary" data-status="rejected">
+                                        已拒绝
+                                    </button>
+                                </div>
+                                
+                                <div class="flex flex-wrap gap-3">
+                                    <div class="relative">
+                                        <select id="sortSelect" class="pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none appearance-none bg-white">
+                                            <option value="latest">最新发布</option>
+                                            <option value="popular">热度优先</option>
+                                            <option value="oldest">最早发布</option>
+                                        </select>
+                                        <i class="fa fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                    </div>
+                                    
+                                    <div class="relative">
+                                        <input type="text" id="contentSearch" placeholder="搜索店铺名称..." 
+                                            class="pl-3 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">店铺名称</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">地址</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">发布者</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">发布时间</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">点赞数</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200" id="contentTableBody">
+                                        <!-- 内容将通过JavaScript动态生成 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mt-6">
+                                <div class="text-sm text-gray-500">
+                                    显示 <span id="showingRange">1-10</span> 条，共 <span id="totalItems">24</span> 条
+                                </div>
+                                <div class="flex">
+                                    <button class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-l-lg bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50" disabled>
+                                        <i class="fa fa-angle-left"></i>
+                                    </button>
+                                    <button class="w-8 h-8 flex items-center justify-center border-t border-b border-gray-300 bg-primary text-white">1</button>
+                                    <button class="w-8 h-8 flex items-center justify-center border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50">2</button>
+                                    <button class="w-8 h-8 flex items-center justify-center border-t border-b border-gray-300 bg-white text-gray-700 hover:bg-gray-50">3</button>
+                                    <button class="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-r-lg bg-white text-gray-500 hover:bg-gray-50">
+                                        <i class="fa fa-angle-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 用户管理页面 -->
+                <div id="usersContent" class="hidden">
+                    <div class="card mb-6">
+                        <div class="p-5 border-b border-gray-200">
+                            <h3 class="font-bold">用户管理</h3>
+                            <p class="text-gray-500 text-sm mt-1">查看用户活跃度和相关信息</p>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                                <div class="text-sm text-gray-600">
+                                    显示用户活跃度排名和相关数据
+                                </div>
+                                
+                                <div class="relative">
+                                    <input type="text" id="userSearch" placeholder="搜索用户名..." 
+                                        class="pl-3 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                <div class="card p-5 lg:col-span-2">
+                                    <h3 class="font-bold mb-4">用户活跃度分布</h3>
+                                    <div class="h-64">
+                                        <canvas id="userActivityChart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <div class="card p-5">
+                                    <h3 class="font-bold mb-4">用户贡献排行</h3>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center font-bold mr-3">1</div>
+                                            <img src="https://picsum.photos/id/1012/40/40" alt="用户头像" class="w-10 h-10 rounded-full object-cover mr-3">
+                                            <div class="flex-1">
+                                                <div class="font-medium">user_8745</div>
+                                                <div class="text-xs text-gray-500">发布了 24 条内容</div>
+                                            </div>
+                                            <div class="text-success font-medium">128</div>
+                                        </div>
+                                        
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center font-bold mr-3">2</div>
+                                            <img src="https://picsum.photos/id/1025/40/40" alt="用户头像" class="w-10 h-10 rounded-full object-cover mr-3">
+                                            <div class="flex-1">
+                                                <div class="font-medium">user_2156</div>
+                                                <div class="text-xs text-gray-500">发布了 18 条内容</div>
+                                            </div>
+                                            <div class="text-success font-medium">96</div>
+                                        </div>
+                                        
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center font-bold mr-3">3</div>
+                                            <img src="https://picsum.photos/id/1027/40/40" alt="用户头像" class="w-10 h-10 rounded-full object-cover mr-3">
+                                            <div class="flex-1">
+                                                <div class="font-medium">user_6325</div>
+                                                <div class="text-xs text-gray-500">发布了 15 条内容</div>
+                                            </div>
+                                            <div class="text-success font-medium">75</div>
+                                        </div>
+                                        
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center font-bold mr-3">4</div>
+                                            <img src="https://picsum.photos/id/1074/40/40" alt="用户头像" class="w-10 h-10 rounded-full object-cover mr-3">
+                                            <div class="flex-1">
+                                                <div class="font-medium">user_1589</div>
+                                                <div class="text-xs text-gray-500">发布了 12 条内容</div>
+                                            </div>
+                                            <div class="text-success font-medium">63</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户ID</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户名</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">注册时间</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">发布内容</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">获得点赞</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最后活跃</th>
+                                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="py-3 px-4 text-sm">user_8745</td>
+                                            <td class="py-3 px-4">
+                                                <div class="flex items-center">
+                                                    <img src="https://picsum.photos/id/1012/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover mr-3">
+                                                    <span>张晓明</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-4 text-sm">2023-05-12</td>
+                                            <td class="py-3 px-4 text-sm">24</td>
+                                            <td class="py-3 px-4 text-sm">356</td>
+                                            <td class="py-3 px-4 text-sm">今天 14:32</td>
+                                            <td class="py-3 px-4">
+                                                <span class="status-badge bg-success/10 text-success">活跃</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3 px-4 text-sm">user_2156</td>
+                                            <td class="py-3 px-4">
+                                                <div class="flex items-center">
+                                                    <img src="https://picsum.photos/id/1025/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover mr-3">
+                                                    <span>李志强</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-4 text-sm">2023-06-08</td>
+                                            <td class="py-3 px-4 text-sm">18</td>
+                                            <td class="py-3 px-4 text-sm">289</td>
+                                            <td class="py-3 px-4 text-sm">昨天 09:15</td>
+                                            <td class="py-3 px-4">
+                                                <span class="status-badge bg-success/10 text-success">活跃</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3 px-4 text-sm">user_6325</td>
+                                            <td class="py-3 px-4">
+                                                <div class="flex items-center">
+                                                    <img src="https://picsum.photos/id/1027/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover mr-3">
+                                                    <span>王丽娟</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-4 text-sm">2023-04-25</td>
+                                            <td class="py-3 px-4 text-sm">15</td>
+                                            <td class="py-3 px-4 text-sm">215</td>
+                                            <td class="py-3 px-4 text-sm">3天前</td>
+                                            <td class="py-3 px-4">
+                                                <span class="status-badge bg-warning/10 text-warning">一般</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3 px-4 text-sm">user_1589</td>
+                                            <td class="py-3 px-4">
+                                                <div class="flex items-center">
+                                                    <img src="https://picsum.photos/id/1074/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover mr-3">
+                                                    <span>赵建国</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-4 text-sm">2023-03-17</td>
+                                            <td class="py-3 px-4 text-sm">12</td>
+                                            <td class="py-3 px-4 text-sm">189</td>
+                                            <td class="py-3 px-4 text-sm">1周前</td>
+                                            <td class="py-3 px-4">
+                                                <span class="status-badge bg-warning/10 text-warning">一般</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3 px-4 text-sm">user_9632</td>
+                                            <td class="py-3 px-4">
+                                                <div class="flex items-center">
+                                                    <img src="https://picsum.photos/id/1062/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover mr-3">
+                                                    <span>陈海燕</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-3 px-4 text-sm">2023-01-05</td>
+                                            <td class="py-3 px-4 text-sm">8</td>
+                                            <td class="py-3 px-4 text-sm">95</td>
+                                            <td class="py-3 px-4 text-sm">1个月前</td>
+                                            <td class="py-3 px-4">
+                                                <span class="status-badge bg-gray-100 text-gray-600">不活跃</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 测试工具页面 -->
+                <div id="testToolsContent" class="hidden">
+                    <div class="card mb-6">
+                        <div class="p-5 border-b border-gray-200">
+                            <h3 class="font-bold">测试工具</h3>
+                            <p class="text-gray-500 text-sm mt-1">内部测试操作工具</p>
+                        </div>
+                        <div class="p-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                                    <h4 class="font-medium mb-4 flex items-center">
+                                        <i class="fa fa-database text-primary mr-2"></i>
+                                        数据操作
+                                    </h4>
+                                    <div class="space-y-3">
+                                        <button id="resetTestDataBtn" class="btn btn-secondary w-full">
+                                            <i class="fa fa-refresh mr-2"></i> 重置测试数据
+                                        </button>
+                                        <button id="generateTestDataBtn" class="btn btn-secondary w-full">
+                                            <i class="fa fa-plus-circle mr-2"></i> 生成新测试数据
+                                        </button>
+                                        <button id="increasePendingBtn" class="btn btn-secondary w-full">
+                                            <i class="fa fa-clock-o mr-2"></i> 增加待审核内容
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                                    <h4 class="font-medium mb-4 flex items-center">
+                                        <i class="fa fa-chart-bar text-primary mr-2"></i>
+                                        统计操作
+                                    </h4>
+                                    <div class="space-y-3">
+                                        <button id="randomizeStatsBtn" class="btn btn-secondary w-full">
+                                            <i class="fa fa-random mr-2"></i> 随机化统计数据
+                                        </button>
+                                        <button id="increaseUsersBtn" class="btn btn-secondary w-full">
+                                            <i class="fa fa-user-plus mr-2"></i> 增加用户数量
+                                        </button>
+                                        <button id="increaseLikesBtn" class="btn btn-secondary w-full">
+                                            <i class="fa fa-heart mr-2"></i> 增加点赞数
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                                <h4 class="font-medium mb-2 text-primary flex items-center">
+                                    <i class="fa fa-info-circle mr-2"></i>
+                                    测试说明
+                                </h4>
+                                <ul class="text-sm text-gray-600 space-y-1 list-disc pl-5">
+                                    <li>所有操作仅影响本地测试数据，不会修改真实数据库</li>
+                                    <li>重置数据将恢复到初始测试状态</li>
+                                    <li>生成新数据会随机创建10条新的测试内容</li>
+                                    <li>统计数据随机化可模拟不同时间段的系统状态</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 内容详情弹窗 -->
+    <div id="postDetailModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-5 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="font-bold text-lg">内容详情</h3>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5" id="postDetailContent">
+                <!-- 内容详情将通过JavaScript动态生成 -->
+            </div>
+            <div class="p-5 border-t border-gray-200 flex justify-end gap-3 sticky bottom-0 bg-white z-10">
+                <button id="deletePostBtn" class="btn btn-danger">
+                    <i class="fa fa-trash mr-2"></i> 删除内容
+                </button>
+                <button id="rejectPostBtn" class="btn btn-danger">
+                    <i class="fa fa-times mr-2"></i> 拒绝展示
+                </button>
+                <button id="approvePostBtn" class="btn btn-success">
+                    <i class="fa fa-check mr-2"></i> 允许展示
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据 - 社区内容
+        let postsData = [
+            {
+                id: 1258,
+                shopName: "老地方烧烤",
+                shopLocation: "朝阳区建国路88号",
+                shopPrice: 65,
+                comment: "这家烧烤店的羊肉串非常正宗，肉质鲜嫩多汁，老板人也很热情。推荐尝试他们的烤鸡翅和烤茄子，味道一流！",
+                images: [
+                    "https://picsum.photos/id/431/300/200",
+                    "https://picsum.photos/id/292/300/200"
+                ],
+                userId: "user_8745",
+                userName: "张晓明",
+                likes: 128,
+                status: "approved",
+                createdAt: "2023-08-15T18:30:00"
+            },
+            {
+                id: 1257,
+                shopName: "新疆风味烤串",
+                shopLocation: "海淀区中关村大街25号",
+                shopPrice: 58,
+                comment: "正宗新疆风味，老板是新疆人，烤串的味道很地道，特别是烤腰子很新鲜，值得一试。",
+                images: [
+                    "https://picsum.photos/id/488/300/200"
+                ],
+                userId: "user_3698",
+                userName: "刘建华",
+                likes: 42,
+                status: "pending",
+                createdAt: "2023-08-16T19:45:00"
+            },
+            {
+                id: 1256,
+                shopName: "海边烧烤城",
+                shopLocation: "丰台区马家堡东路121号",
+                shopPrice: 78,
+                comment: "环境不错，海鲜很新鲜，特别是烤生蚝和扇贝，非常鲜美。就是价格有点小贵，但值得体验。",
+                images: [
+                    "https://picsum.photos/id/429/300/200",
+                    "https://picsum.photos/id/493/300/200",
+                    "https://picsum.photos/id/674/300/200"
+                ],
+                userId: "user_7412",
+                userName: "陈明",
+                likes: 86,
+                status: "approved",
+                createdAt: "2023-08-14T20:15:00"
+            },
+            {
+                id: 1255,
+                shopName: "胡同里的烧烤",
+                shopLocation: "东城区南锣鼓巷18号",
+                shopPrice: 52,
+                comment: "隐藏在胡同里的小店，味道很有特色，推荐烤羊腰和烤馒头片，配上冰镇啤酒简直完美。",
+                images: [],
+                userId: "user_8523",
+                userName: "林小雨",
+                likes: 37,
+                status: "rejected",
+                createdAt: "2023-08-13T19:30:00"
+            },
+            {
+                id: 1254,
+                shopName: "东北烧烤王",
+                shopLocation: "西城区西四北大街56号",
+                shopPrice: 60,
+                comment: "东北风味烧烤，分量很足，推荐烤实蛋和烤冷面，很有特色。老板很热情，上菜速度也快。",
+                images: [
+                    "https://picsum.photos/id/312/300/200",
+                    "https://picsum.photos/id/431/300/200"
+                ],
+                userId: "user_2156",
+                userName: "李志强",
+                likes: 96,
+                status: "approved",
+                createdAt: "2023-08-12T21:00:00"
+            },
+            {
+                id: 1253,
+                shopName: "韩式烤肉",
+                shopLocation: "海淀区学院路38号",
+                shopPrice: 88,
+                comment: "韩式风格的烧烤，需要自己动手烤，肉质很好，蘸料也很正宗，推荐五花肉和牛小排。",
+                images: [
+                    "https://picsum.photos/id/488/300/200",
+                    "https://picsum.photos/id/493/300/200"
+                ],
+                userId: "user_9632",
+                userName: "陈海燕",
+                likes: 54,
+                status: "pending",
+                createdAt: "2023-08-11T18:45:00"
+            }
+        ];
+
+        // 保存原始数据用于重置
+        const originalPostsData = JSON.parse(JSON.stringify(postsData));
+        let totalUsers = 128;
+        const originalTotalUsers = totalUsers;
+
+        // DOM元素
+        const adminPage = document.getElementById('adminPage');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        const pageTitle = document.getElementById('pageTitle');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const contentContent = document.getElementById('contentContent');
+        const usersContent = document.getElementById('usersContent');
+        const testToolsContent = document.getElementById('testToolsContent');
+        const contentTableBody = document.getElementById('contentTableBody');
+        const statusFilterBtns = document.querySelectorAll('.status-filter-btn');
+        const sortSelect = document.getElementById('sortSelect');
+        const contentSearch = document.getElementById('contentSearch');
+        const postDetailModal = document.getElementById('postDetailModal');
+        const postDetailContent = document.getElementById('postDetailContent');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const approvePostBtn = document.getElementById('approvePostBtn');
+        const rejectPostBtn = document.getElementById('rejectPostBtn');
+        const deletePostBtn = document.getElementById('deletePostBtn'); // 新增删除按钮
+        const showingRange = document.getElementById('showingRange');
+        const totalItems = document.getElementById('totalItems');
+        const currentAdminName = document.getElementById('currentAdminName');
+        
+        // 测试工具按钮
+        const resetTestDataBtn = document.getElementById('resetTestDataBtn');
+        const generateTestDataBtn = document.getElementById('generateTestDataBtn');
+        const increasePendingBtn = document.getElementById('increasePendingBtn');
+        const randomizeStatsBtn = document.getElementById('randomizeStatsBtn');
+        const increaseUsersBtn = document.getElementById('increaseUsersBtn');
+        const increaseLikesBtn = document.getElementById('increaseLikesBtn');
+        
+        // 当前选中的帖子ID
+        let currentPostId = null;
+        
+        // 初始化 - 直接进入管理后台
+        function init() {
+            // 初始化图表
+            initCharts();
+            
+            // 加载内容数据
+            renderContentTable(postsData);
+            
+            // 显示欢迎提示
+            showToast('已直接进入管理系统（测试模式）');
+            
+            // 登出功能 - 仅刷新页面
+            logoutBtn.addEventListener('click', function() {
+                if (confirm('确定要退出系统吗？')) {
+                    location.reload();
+                }
+            });
+            
+            // 侧边栏导航
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 移除所有active类
+                    sidebarItems.forEach(i => i.classList.remove('active'));
+                    // 给当前点击项添加active类
+                    this.classList.add('active');
+                    
+                    // 切换内容显示
+                    const target = this.getAttribute('data-target');
+                    dashboardContent.classList.add('hidden');
+                    contentContent.classList.add('hidden');
+                    usersContent.classList.add('hidden');
+                    testToolsContent.classList.add('hidden');
+                    
+                    if (target === 'dashboard') {
+                        dashboardContent.classList.remove('hidden');
+                        pageTitle.textContent = '数据概览';
+                    } else if (target === 'content') {
+                        contentContent.classList.remove('hidden');
+                        pageTitle.textContent = '内容管理';
+                    } else if (target === 'users') {
+                        usersContent.classList.remove('hidden');
+                        pageTitle.textContent = '用户管理';
+                    } else if (target === 'testTools') {
+                        testToolsContent.classList.remove('hidden');
+                        pageTitle.textContent = '测试工具';
+                    }
+                });
+            });
+            
+            // 状态筛选按钮
+            statusFilterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active状态
+                    statusFilterBtns.forEach(b => {
+                        b.classList.remove('btn-primary');
+                        b.classList.add('btn-secondary');
+                    });
+                    
+                    // 设置当前按钮为active
+                    this.classList.remove('btn-secondary');
+                    this.classList.add('btn-primary');
+                    
+                    // 筛选内容
+                    const status = this.getAttribute('data-status');
+                    filterAndRenderContent(status);
+                });
+            });
+            
+            // 排序选择
+            sortSelect.addEventListener('change', function() {
+                filterAndRenderContent(getCurrentFilterStatus());
+            });
+            
+            // 内容搜索
+            contentSearch.addEventListener('input', function() {
+                filterAndRenderContent(getCurrentFilterStatus());
+            });
+            
+            // 关闭弹窗
+            closeModalBtn.addEventListener('click', function() {
+                postDetailModal.classList.add('hidden');
+                currentPostId = null;
+            });
+            
+            // 允许展示
+            approvePostBtn.addEventListener('click', function() {
+                if (currentPostId !== null) {
+                    updatePostStatus(currentPostId, 'approved');
+                    postDetailModal.classList.add('hidden');
+                    filterAndRenderContent(getCurrentFilterStatus());
+                    showToast('已批准展示该内容（测试模式）');
+                }
+            });
+            
+            // 拒绝展示
+            rejectPostBtn.addEventListener('click', function() {
+                if (currentPostId !== null) {
+                    updatePostStatus(currentPostId, 'rejected');
+                    postDetailModal.classList.add('hidden');
+                    filterAndRenderContent(getCurrentFilterStatus());
+                    showToast('已拒绝展示该内容（测试模式）');
+                }
+            });
+            
+            // 新增：删除内容
+            deletePostBtn.addEventListener('click', function() {
+                if (currentPostId !== null) {
+                    if (confirm('确定要删除这条内容吗？此操作不可恢复。')) {
+                        deletePost(currentPostId);
+                        postDetailModal.classList.add('hidden');
+                        filterAndRenderContent(getCurrentFilterStatus());
+                        showToast('已删除该内容（测试模式）');
+                    }
+                }
+            });
+            
+            // 点击热门分享中的查看按钮
+            document.querySelectorAll('.view-post').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const postId = parseInt(this.getAttribute('data-id'));
+                    showPostDetail(postId);
+                });
+            });
+            
+            // 新增：点击热门分享中的删除按钮
+            document.querySelectorAll('.delete-post').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const postId = parseInt(this.getAttribute('data-id'));
+                    if (confirm('确定要删除这条内容吗？此操作不可恢复。')) {
+                        deletePost(postId);
+                        filterAndRenderContent(getCurrentFilterStatus());
+                        showToast('已删除该内容（测试模式）');
+                    }
+                });
+            });
+            
+            // 从概览页面直接进入内容管理
+            document.querySelector('[data-target="content"]').addEventListener('click', function() {
+                sidebarItems.forEach(i => i.classList.remove('active'));
+                document.querySelector('.sidebar-item[data-target="content"]').classList.add('active');
+                dashboardContent.classList.add('hidden');
+                contentContent.classList.remove('hidden');
+                pageTitle.textContent = '内容管理';
+            });
+            
+            // 测试工具按钮事件
+            resetTestDataBtn.addEventListener('click', function() {
+                if (confirm('确定要重置所有测试数据吗？这将恢复到初始状态。')) {
+                    // 重置数据
+                    postsData = JSON.parse(JSON.stringify(originalPostsData));
+                    totalUsers = originalTotalUsers;
+                    document.getElementById('totalUsers').textContent = totalUsers;
+                    
+                    // 重新渲染
+                    filterAndRenderContent(getCurrentFilterStatus());
+                    updateDashboardStats();
+                    if (window.activityChart) window.activityChart.destroy();
+                    if (window.contentChart) window.contentChart.destroy();
+                    if (window.userActivityChart) window.userActivityChart.destroy();
+                    initCharts();
+                    
+                    showToast('测试数据已重置');
+                }
+            });
+            
+            generateTestDataBtn.addEventListener('click', function() {
+                // 生成10条新的测试数据
+                const shopNames = [
+                    "串天下", "烤霸", "火焰烧烤", "夜色烤吧", "金牌烤串",
+                    "老街烧烤", "疯狂烤翅", "草原烤羊", "海鲜烤场", "炭火烤肉"
+                ];
+                
+                const locations = [
+                    "海淀区中关村", "朝阳区三里屯", "东城区王府井", "西城区西单", "丰台区马家堡",
+                    "通州区万达", "顺义区空港", "昌平区回龙观", "大兴区黄村", "房山区良乡"
+                ];
+                
+                const comments = [
+                    "味道不错，值得推荐！",
+                    "环境很好，服务周到，烧烤味道正宗。",
+                    "价格实惠，分量很足，下次还会再来。",
+                    "食材新鲜，烤得恰到好处，非常美味。",
+                    "朋友聚会的好地方，气氛很棒。"
+                ];
+                
+                for (let i = 0; i < 10; i++) {
+                    const now = new Date();
+                    now.setMinutes(now.getMinutes() - Math.floor(Math.random() * 1440)); // 随机时间，最多24小时前
+                    
+                    const newPost = {
+                        id: 1000 - i,
+                        shopName: shopNames[Math.floor(Math.random() * shopNames.length)],
+                        shopLocation: locations[Math.floor(Math.random() * locations.length)] + Math.floor(Math.random() * 100) + "号",
+                        shopPrice: 40 + Math.floor(Math.random() * 60), // 40-100元
+                        comment: comments[Math.floor(Math.random() * comments.length)],
+                        images: Math.random() > 0.3 ? [ // 70%概率有图片
+                            `https://picsum.photos/id/${300 + i}/300/200`,
+                            ...(Math.random() > 0.5 ? [`https://picsum.photos/id/${400 + i}/300/200`] : [])
+                        ] : [],
+                        userId: `user_${Math.floor(Math.random() * 10000)}`,
+                        userName: `测试用户${i+1}`,
+                        likes: Math.floor(Math.random() * 200),
+                        status: Math.random() > 0.5 ? "pending" : (Math.random() > 0.5 ? "approved" : "rejected"),
+                        createdAt: now.toISOString()
+                    };
+                    
+                    postsData.unshift(newPost);
+                }
+                
+                // 重新渲染
+                filterAndRenderContent(getCurrentFilterStatus());
+                updateDashboardStats();
+                showToast('已生成10条新测试数据');
+            });
+            
+            increasePendingBtn.addEventListener('click', function() {
+                // 将随机5条内容改为待审核状态
+                const randomPosts = [...postsData].sort(() => 0.5 - Math.random()).slice(0, 5);
+                randomPosts.forEach(post => {
+                    post.status = "pending";
+                });
+                
+                // 重新渲染
+                filterAndRenderContent(getCurrentFilterStatus());
+                updateDashboardStats();
+                showToast('已将5条内容改为待审核状态');
+            });
+            
+            randomizeStatsBtn.addEventListener('click', function() {
+                // 随机化统计数据
+                if (window.activityChart) {
+                    const newData = window.activityChart.data.datasets[0].data.map(value => {
+                        return Math.max(10, Math.floor(value * (0.7 + Math.random() * 0.6)));
+                    });
+                    window.activityChart.data.datasets[0].data = newData;
+                    window.activityChart.update();
+                }
+                
+                if (window.userActivityChart) {
+                    const newData = window.userActivityChart.data.datasets[0].data.map(value => {
+                        return Math.max(5, Math.floor(value * (0.7 + Math.random() * 0.6)));
+                    });
+                    window.userActivityChart.data.datasets[0].data = newData;
+                    window.userActivityChart.update();
+                }
+                
+                showToast('统计数据已随机化');
+            });
+            
+            increaseUsersBtn.addEventListener('click', function() {
+                // 增加用户数量
+                const increase = Math.floor(Math.random() * 20) + 5; // 5-25之间
+                totalUsers += increase;
+                document.getElementById('totalUsers').textContent = totalUsers;
+                showToast(`已增加${increase}个用户，当前总用户数: ${totalUsers}`);
+            });
+            
+            increaseLikesBtn.addEventListener('click', function() {
+                // 为随机10条内容增加点赞数
+                const randomPosts = [...postsData].sort(() => 0.5 - Math.random()).slice(0, 10);
+                randomPosts.forEach(post => {
+                    const increase = Math.floor(Math.random() * 15) + 1; // 1-15之间
+                    post.likes += increase;
+                });
+                
+                // 重新渲染
+                filterAndRenderContent(getCurrentFilterStatus());
+                showToast('已为10条内容增加随机点赞数');
+            });
+        }
+        
+        // 获取当前筛选状态
+        function getCurrentFilterStatus() {
+            let status = 'all';
+            statusFilterBtns.forEach(btn => {
+                if (btn.classList.contains('btn-primary')) {
+                    status = btn.getAttribute('data-status');
+                }
+            });
+            return status;
+        }
+        
+        // 筛选并渲染内容
+        function filterAndRenderContent(status) {
+            let filteredPosts = [...postsData];
+            
+            // 按状态筛选
+            if (status !== 'all') {
+                filteredPosts = filteredPosts.filter(post => post.status === status);
+            }
+            
+            // 按搜索词筛选
+            const searchTerm = contentSearch.value.toLowerCase().trim();
+            if (searchTerm) {
+                filteredPosts = filteredPosts.filter(post => 
+                    post.shopName.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // 排序
+            const sortType = sortSelect.value;
+            if (sortType === 'latest') {
+                filteredPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            } else if (sortType === 'popular') {
+                filteredPosts.sort((a, b) => b.likes - a.likes);
+            } else if (sortType === 'oldest') {
+                filteredPosts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            }
+            
+            // 渲染表格
+            renderContentTable(filteredPosts);
+            
+            // 更新统计信息
+            totalItems.textContent = filteredPosts.length;
+            showingRange.textContent = `1-${Math.min(filteredPosts.length, 10)}`;
+        }
+        
+        // 渲染内容表格
+        function renderContentTable(posts) {
+            contentTableBody.innerHTML = '';
+            
+            if (posts.length === 0) {
+                contentTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="py-8 text-center text-gray-500">
+                            <i class="fa fa-folder-open-o text-2xl mb-2"></i>
+                            <p>没有找到符合条件的内容</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            posts.forEach(post => {
+                // 格式化日期
+                const date = new Date(post.createdAt);
+                const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                
+                // 状态样式
+                let statusClass = '';
+                let statusText = '';
+                
+                if (post.status === 'approved') {
+                    statusClass = 'bg-success/10 text-success';
+                    statusText = '已展示';
+                } else if (post.status === 'pending') {
+                    statusClass = 'bg-warning/10 text-warning';
+                    statusText = '待审核';
+                } else if (post.status === 'rejected') {
+                    statusClass = 'bg-danger/10 text-danger';
+                    statusText = '已拒绝';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-sm">#${post.id}</td>
+                    <td class="py-3 px-4 text-sm">${post.shopName}</td>
+                    <td class="py-3 px-4 text-sm">${post.shopLocation}</td>
+                    <td class="py-3 px-4 text-sm">${post.userId}</td>
+                    <td class="py-3 px-4 text-sm">${formattedDate}</td>
+                    <td class="py-3 px-4 text-sm">${post.likes}</td>
+                    <td class="py-3 px-4">
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </td>
+                    <td class="py-3 px-4 text-sm">
+                        <button class="text-primary hover:text-primary/80 view-post-btn" data-id="${post.id}">查看</button>
+                        <span class="mx-2 text-gray-300">|</span>
+                        <button class="text-danger hover:text-danger/80 delete-post-btn" data-id="${post.id}">删除</button>
+                    </td>
+                `;
+                
+                contentTableBody.appendChild(row);
+            });
+            
+            // 绑定查看按钮事件
+            document.querySelectorAll('.view-post-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const postId = parseInt(this.getAttribute('data-id'));
+                    showPostDetail(postId);
+                });
+            });
+            
+            // 新增：绑定删除按钮事件
+            document.querySelectorAll('.delete-post-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const postId = parseInt(this.getAttribute('data-id'));
+                    if (confirm('确定要删除这条内容吗？此操作不可恢复。')) {
+                        deletePost(postId);
+                        filterAndRenderContent(getCurrentFilterStatus());
+                        showToast('已删除该内容（测试模式）');
+                    }
+                });
+            });
+        }
+        
+        // 显示帖子详情
+        function showPostDetail(postId) {
+            const post = postsData.find(p => p.id === postId);
+            if (!post) return;
+            
+            currentPostId = postId;
+            
+            // 格式化日期
+            const date = new Date(post.createdAt);
+            const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+            
+            // 状态样式和文本
+            let statusClass = '';
+            let statusText = '';
+            
+            if (post.status === 'approved') {
+                statusClass = 'bg-success/10 text-success';
+                statusText = '已展示';
+                // 已批准状态下隐藏批准按钮，显示拒绝按钮
+                approvePostBtn.classList.add('hidden');
+                rejectPostBtn.classList.remove('hidden');
+            } else if (post.status === 'pending') {
+                statusClass = 'bg-warning/10 text-warning';
+                statusText = '待审核';
+                // 待审核状态下显示两个按钮
+                approvePostBtn.classList.remove('hidden');
+                rejectPostBtn.classList.remove('hidden');
+            } else if (post.status === 'rejected') {
+                statusClass = 'bg-danger/10 text-danger';
+                statusText = '已拒绝';
+                // 已拒绝状态下显示批准按钮，隐藏拒绝按钮
+                approvePostBtn.classList.remove('hidden');
+                rejectPostBtn.classList.add('hidden');
+            }
+            
+            // 构建图片HTML
+            let imagesHtml = '';
+            if (post.images && post.images.length > 0) {
+                imagesHtml = '<div class="grid grid-cols-1 md:grid-cols-3 gap-3 my-4">';
+                post.images.forEach(img => {
+                    imagesHtml += `
+                        <div class="rounded-lg overflow-hidden">
+                            <img src="${img}" alt="${post.shopName}的图片" class="w-full h-40 object-cover hover:scale-105 transition-transform duration-300">
+                        </div>
+                    `;
+                });
+                imagesHtml += '</div>';
+            } else {
+                imagesHtml = '<div class="bg-gray-100 rounded-lg p-4 text-center text-gray-500 my-4">该内容没有图片</div>';
+            }
+            
+            // 填充详情内容
+            postDetailContent.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="text-xl font-bold">${post.shopName}</h4>
+                        <span class="status-badge ${statusClass} mt-2 inline-block">${statusText}</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">ID: #${post.id}</div>
+                        <div class="text-sm text-gray-500">发布时间: ${formattedDate}</div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-4">
+                    <div class="flex items-center mb-3">
+                        <i class="fa fa-map-marker text-primary w-5 text-center mr-2"></i>
+                        <span>${post.shopLocation}</span>
+                    </div>
+                    
+                    <div class="flex items-center mb-3">
+                        <i class="fa fa-money text-primary w-5 text-center mr-2"></i>
+                        <span>人均消费: ¥${post.shopPrice}</span>
+                    </div>
+                    
+                    <div class="flex items-center mb-3">
+                        <i class="fa fa-user text-primary w-5 text-center mr-2"></i>
+                        <span>发布者: ${post.userId} (${post.userName})</span>
+                    </div>
+                    
+                    <div class="flex items-center mb-4">
+                        <i class="fa fa-heart text-primary w-5 text-center mr-2"></i>
+                        <span>获得点赞: ${post.likes}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5 class="font-medium mb-2">推荐理由:</h5>
+                        <div class="bg-gray-50 p-3 rounded-lg">${post.comment}</div>
+                    </div>
+                    
+                    <h5 class="font-medium mb-2">图片展示:</h5>
+                    ${imagesHtml}
+                </div>
+            `;
+            
+            // 显示弹窗
+            postDetailModal.classList.remove('hidden');
+        }
+        
+        // 更新帖子状态
+        function updatePostStatus(postId, status) {
+            const post = postsData.find(p => p.id === postId);
+            if (post) {
+                post.status = status;
+                // 更新概览页面的统计数据
+                updateDashboardStats();
+            }
+        }
+        
+        // 新增：删除帖子
+        function deletePost(postId) {
+            const index = postsData.findIndex(p => p.id === postId);
+            if (index !== -1) {
+                postsData.splice(index, 1);
+                // 更新概览页面的统计数据
+                updateDashboardStats();
+            }
+        }
+        
+        // 更新概览页面统计数据
+        function updateDashboardStats() {
+            const total = postsData.length;
+            const pending = postsData.filter(p => p.status === 'pending').length;
+            const approved = postsData.filter(p => p.status === 'approved').length;
+            const rejected = postsData.filter(p => p.status === 'rejected').length;
+            
+            document.getElementById('totalPosts').textContent = total;
+            document.getElementById('pendingPosts').textContent = pending;
+            
+            // 更新图表
+            if (window.contentChart) {
+                window.contentChart.data.datasets[0].data = [approved, pending, rejected];
+                window.contentChart.update();
+            }
+        }
+        
+        // 初始化图表
+        function initCharts() {
+            // 用户活跃度趋势图
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            window.activityChart = new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '活跃用户数',
+                        data: [32, 45, 38, 52, 68, 75, 62],
+                        borderColor: '#FF6B35',
+                        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 内容状态分布图
+            const contentCtx = document.getElementById('contentChart').getContext('2d');
+            const approved = postsData.filter(p => p.status === 'approved').length;
+            const pending = postsData.filter(p => p.status === 'pending').length;
+            const rejected = postsData.filter(p => p.status === 'rejected').length;
+            
+            window.contentChart = new Chart(contentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['已展示', '待审核', '已拒绝'],
+                    datasets: [{
+                        data: [approved, pending, rejected],
+                        backgroundColor: [
+                            '#10B981', // success
+                            '#F59E0B', // warning
+                            '#EF4444'  // danger
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                boxWidth: 12
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+            
+            // 用户活跃度分布图
+            const userActivityCtx = document.getElementById('userActivityChart').getContext('2d');
+            window.userActivityChart = new Chart(userActivityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-5条', '6-10条', '11-20条', '21-50条', '50条以上'],
+                    datasets: [{
+                        label: '用户数量',
+                        data: [45, 32, 28, 15, 8],
+                        backgroundColor: '#FF6B35',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 显示提示消息
+        function showToast(message) {
+            // 创建toast元素
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-dark text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center transform translate-y-10 opacity-0 transition-all duration-300';
+            toast.innerHTML = `
+                <i class="fa fa-check-circle mr-2 text-green-400"></i>
+                <span>${message}</span>
+            `;
+            
+            // 添加到页面
+            document.body.appendChild(toast);
+            
+            // 显示动画
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+            }, 100);
+            
+            // 3秒后隐藏
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-10', 'opacity-0');
+                
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+        
+        // 页面加载完成后初始化 - 直接进入管理系统
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

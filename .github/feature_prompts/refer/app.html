@@ -1,0 +1,1337 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>烧烤点单记录与社区</title>
+    <!-- 外部资源引用 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    
+    <!-- 配置Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF6B35', // 烧烤主题色-橙色
+                        secondary: '#6B7280',
+                        light: '#F9FAFB',
+                        dark: '#1F2937',
+                        gray: {
+                            100: '#F3F4F6',
+                            200: '#E5E7EB',
+                            300: '#D1D5DB',
+                            400: '#9CA3AF',
+                            500: '#6B7280',
+                            600: '#4B5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card {
+                @apply bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden;
+            }
+            .btn {
+                @apply rounded-lg font-medium transition-all duration-200 flex items-center justify-center;
+            }
+            .btn-primary {
+                @apply bg-primary text-white hover:bg-primary/90;
+            }
+            .btn-secondary {
+                @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+            }
+            .input {
+                @apply w-full px-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary focus:outline-none text-gray-800;
+            }
+            .tab-bar {
+                @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex z-50;
+            }
+            .tab-item {
+                @apply flex-1 py-3 flex flex-col items-center text-gray-500;
+            }
+            .tab-item.active {
+                @apply text-primary;
+            }
+            .list-item {
+                @apply py-3 border-b border-gray-100 last:border-0;
+            }
+            .status-pending {
+                @apply bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded-full;
+            }
+            .status-approved {
+                @apply bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full;
+            }
+            .image-upload-container {
+                @apply flex gap-2 mb-3 overflow-x-auto pb-2;
+            }
+            .image-upload-item {
+                @apply w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center relative flex-shrink-0;
+            }
+            .image-preview {
+                @apply w-full h-full object-cover rounded-lg;
+            }
+            .image-remove {
+                @apply absolute top-1 right-1 bg-black/50 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs hover:bg-black/70;
+            }
+            .post-images {
+                @apply flex gap-1.5 my-2 overflow-x-auto pb-1;
+            }
+            .post-image-item {
+                @apply w-24 h-24 rounded-lg overflow-hidden flex-shrink-0;
+            }
+            .location-permission {
+                @apply fixed inset-0 bg-dark/70 z-50 flex items-center justify-center p-4;
+            }
+            .permission-card {
+                @apply bg-white rounded-xl p-5 max-w-xs w-full;
+            }
+        }
+    </style>
+    
+    <!-- 基础样式保障 -->
+    <style>
+        body {
+            padding-bottom: 60px; /* 为底部导航留出空间 */
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+            background-color: #F9FAFB;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-dark min-h-screen">
+    <!-- 位置权限请求弹窗 -->
+    <div id="locationPermission" class="location-permission hidden">
+        <div class="permission-card">
+            <div class="text-center mb-4">
+                <i class="fa fa-map-marker text-primary text-3xl"></i>
+                <h3 class="font-bold mt-3">启用位置服务</h3>
+                <p class="text-sm text-gray-500 mt-1">为了显示烧烤店距离，需要获取您的位置信息</p>
+                <p class="text-xs text-gray-400 mt-2">您可以选择不允许，仍可正常使用其他功能</p>
+            </div>
+            <button id="allowLocation" class="btn btn-primary w-full py-3">
+                允许获取位置
+            </button>
+            <button id="denyLocation" class="btn btn-secondary w-full py-3 mt-2">
+                不允许
+            </button>
+        </div>
+    </div>
+
+    <!-- 顶部导航 -->
+    <header class="bg-primary text-white shadow-sm sticky top-0 z-30">
+        <div class="container mx-auto px-4 py-4 flex justify-center items-center">
+            <h1 class="text-lg font-bold flex items-center">
+                <i class="fa fa-fire mr-2 text-yellow-200"></i>
+                烧烤点单记录
+            </h1>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-4">
+        <!-- 订单记录页面 -->
+        <section id="orderSection">
+            <!-- 点单表单区域 -->
+            <section class="card mb-4">
+                <div class="px-4 py-3 border-b border-gray-100">
+                    <h2 class="text-base font-bold text-gray-800">添加菜品</h2>
+                </div>
+                
+                <form id="orderForm" class="p-4 space-y-3">
+                    <div>
+                        <label for="dishName" class="block text-xs text-gray-500 mb-1">菜名</label>
+                        <input type="text" id="dishName" placeholder="例如：烤羊肉串" required="" class="input">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="dishPrice" class="block text-xs text-gray-500 mb-1">单价 (元)</label>
+                            <input type="number" id="dishPrice" min="0" step="0.01" placeholder="0.00" required="" class="input">
+                        </div>
+                        
+                        <div>
+                            <label for="dishQuantity" class="block text-xs text-gray-500 mb-1">数量</label>
+                            <input type="number" id="dishQuantity" min="1" value="1" required="" class="input">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-full py-3 mt-2" id="addButton">
+                        <i class="fa fa-plus-circle mr-2"></i> 添加到订单
+                    </button>
+                </form>
+            </section>
+            
+            <!-- 订单列表区域 -->
+            <section class="card mb-4">
+                <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                    <h2 class="text-base font-bold text-gray-800">我的订单</h2>
+                    <span id="itemCount" class="bg-gray-100 px-2 py-1 rounded-full text-xs text-gray-600">0 个菜品</span>
+                </div>
+                
+                <div id="orderListContainer" class="max-h-[400px] overflow-y-auto">
+                    <div id="orderList" class="divide-y divide-gray-100">
+                        <!-- 订单为空状态 -->
+                        <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                            <i class="fa fa-list-alt text-3xl mb-3 opacity-30"></i>
+                            <p class="text-sm">暂无订单，请添加菜品</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 订单状态和计时 -->
+            <section class="card mb-6">
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center">
+                            <span class="text-xs text-gray-500 mr-2">订单状态:</span>
+                            <span class="text-sm font-medium" id="orderStatusText">未开始</span>
+                        </div>
+                        
+                        <div class="bg-gray-100 rounded-lg px-3 py-1.5 flex items-center">
+                            <span class="text-xs text-gray-500 mr-1.5">等待时间:</span>
+                            <span class="text-base font-bold text-primary" id="waitingTime">00:00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button id="startTimerBtn" class="btn btn-primary flex-1 py-3">
+                            <i class="fa fa-clock-o mr-2"></i> 开始计时
+                        </button>
+                        
+                        <button id="completeOrderBtn" class="btn btn-secondary flex-1 py-3" disabled="">
+                            <i class="fa fa-check mr-2"></i> 完成订单
+                        </button>
+                    </div>
+                    
+                    <div class="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
+                        <span class="text-gray-600">总计金额:</span>
+                        <div class="text-xl font-bold text-primary" id="totalAmount">¥0.00</div>
+                    </div>
+                </div>
+            </section>
+        </section>
+        
+        <!-- 社区推荐页面 (默认隐藏) -->
+        <section id="communitySection" class="hidden">
+            <!-- 发布分享区域 -->
+            <section class="card mb-4">
+                <div class="px-4 py-3 border-b border-gray-100">
+                    <h2 class="text-base font-bold text-gray-800">分享烧烤店推荐</h2>
+                </div>
+                
+                <form id="postForm" class="p-4 space-y-3">
+                    <div>
+                        <label for="shopName" class="block text-xs text-gray-500 mb-1">店铺名称</label>
+                        <input type="text" id="shopName" placeholder="例如：老王烧烤店" required="" class="input">
+                    </div>
+                    
+                    <div>
+                        <label for="shopLocation" class="block text-xs text-gray-500 mb-1">地址位置</label>
+                        <input type="text" id="shopLocation" placeholder="例如：XX路XX号" required="" class="input">
+                    </div>
+                    
+                    <div>
+                        <label for="currentLocation" class="block text-xs text-gray-500 mb-1">当前位置</label>
+                        <input type="text" id="currentLocation" placeholder="未获取位置信息" readonly="" class="input bg-gray-50 cursor-not-allowed">
+                    </div>
+                    
+                    <div>
+                        <label for="shopPrice" class="block text-xs text-gray-500 mb-1">人均消费 (元)</label>
+                        <input type="number" id="shopPrice" min="0" step="1" placeholder="例如：50" required="" class="input">
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 mb-1 flex items-center">
+                        <i class="fa fa-map-marker text-primary mr-1.5"></i>
+                        <span>将使用您当前位置标记店铺位置</span>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">上传图片 (最多3张，非必填)</label>
+                        <div class="image-upload-container" id="imageUploadContainer">
+                            <div class="image-upload-item">
+                                <input type="file" id="imageUpload" accept="image/*" multiple="" class="hidden">
+                                <label for="imageUpload" class="cursor-pointer text-gray-500 hover:text-primary">
+                                    <i class="fa fa-camera text-xl"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="shopComment" class="block text-xs text-gray-500 mb-1">推荐理由</label>
+                        <textarea id="shopComment" rows="4" placeholder="推荐特色菜品、价格优势或服务体验等..." required="" class="input"></textarea>
+                    </div>
+                    
+                    <button type="button" id="submitPostBtn" class="btn btn-primary w-full py-3 mt-2">
+                        <i class="fa fa-paper-plane mr-2"></i> 发布推荐
+                    </button>
+                </form>
+            </section>
+            
+            <!-- 社区内容排序和列表 -->
+            <section class="card">
+                <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                    <h2 class="text-base font-bold text-gray-800">社区推荐</h2>
+                    
+                    <div class="flex border rounded-lg overflow-hidden text-xs">
+                        <button id="sortDistance" class="px-3 py-1.5 bg-primary text-white">
+                            距离最近
+                        </button>
+                        <button id="sortLatest" class="px-3 py-1.5 bg-gray-100 text-gray-600">
+                            最新
+                        </button>
+                        <button id="sortPopular" class="px-3 py-1.5 bg-gray-100 text-gray-600">
+                            最热门
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 社区帖子列表 -->
+                <div id="postsList" class="max-h-[500px] overflow-y-auto">
+                    <!-- 帖子为空状态 -->
+                    <div class="flex flex-col items-center justify-center py-16 text-gray-400" id="emptyPosts">
+                        <i class="fa fa-comment-o text-3xl mb-3 opacity-30"></i>
+                        <p class="text-sm">暂无推荐内容，快来发布第一条推荐吧！</p>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <!-- 底部导航栏 - 小程序风格 -->
+    <div class="tab-bar">
+        <button id="orderTab" class="tab-item active">
+            <i class="fa fa-list-alt text-lg mb-1"></i>
+            <span class="text-xs">我的订单</span>
+        </button>
+        <button id="communityTab" class="tab-item">
+            <i class="fa fa-comments text-lg mb-1"></i>
+            <span class="text-xs">社区推荐</span>
+        </button>
+    </div>
+
+    <!-- 通知提示框 -->
+    <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-dark/80 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-all duration-300 flex items-center z-50 text-sm">
+        <i class="fa fa-check-circle mr-2 text-green-400"></i>
+        <span id="toastMessage">操作成功</span>
+    </div>
+
+    <script>
+        // 订单数据管理
+        let orderItems = [];
+        let itemId = 1;
+        let timer = null;
+        let startTime = null;
+        let elapsedSeconds = 0;
+        
+        // 社区数据管理
+        let posts = [];
+        let currentSort = 'distance'; // 默认按距离排序
+        let uploadedImages = []; // 存储上传的图片
+        let userLocation = null; // 用户当前位置 {lat, lng}
+        let userAddress = ""; // 用户当前地址文本
+        let locationPermissionGranted = null; // 记录用户是否允许位置权限
+        
+        // DOM 元素
+        const orderSection = document.getElementById('orderSection');
+        const communitySection = document.getElementById('communitySection');
+        const orderTab = document.getElementById('orderTab');
+        const communityTab = document.getElementById('communityTab');
+        
+        // 订单相关元素
+        const orderForm = document.getElementById('orderForm');
+        const orderList = document.getElementById('orderList');
+        const totalAmountEl = document.getElementById('totalAmount');
+        const itemCountEl = document.getElementById('itemCount');
+        const startTimerBtn = document.getElementById('startTimerBtn');
+        const completeOrderBtn = document.getElementById('completeOrderBtn');
+        const waitingTimeEl = document.getElementById('waitingTime');
+        const orderStatusText = document.getElementById('orderStatusText');
+        
+        // 社区相关元素
+        const postForm = document.getElementById('postForm');
+        const submitPostBtn = document.getElementById('submitPostBtn');
+        const postsList = document.getElementById('postsList');
+        const emptyPosts = document.getElementById('emptyPosts');
+        const sortLatest = document.getElementById('sortLatest');
+        const sortPopular = document.getElementById('sortPopular');
+        const sortDistance = document.getElementById('sortDistance');
+        const imageUpload = document.getElementById('imageUpload');
+        const imageUploadContainer = document.getElementById('imageUploadContainer');
+        const currentLocationInput = document.getElementById('currentLocation');
+        
+        // 位置权限相关元素
+        const locationPermission = document.getElementById('locationPermission');
+        const allowLocation = document.getElementById('allowLocation');
+        const denyLocation = document.getElementById('denyLocation');
+        
+        // 社区表单元素
+        const shopNameInput = document.getElementById('shopName');
+        const shopLocationInput = document.getElementById('shopLocation');
+        const shopPriceInput = document.getElementById('shopPrice');
+        const shopCommentInput = document.getElementById('shopComment');
+        
+        // 通知元素
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        // 初始化
+        function init() {
+            // 检查外部资源是否加载成功
+            checkExternalResources();
+            
+            // 加载订单数据
+            loadOrderData();
+            
+            // 加载社区帖子数据
+            loadPostsData();
+            
+            // 检查位置权限状态
+            checkLocationPermissionStatus();
+            
+            // 事件监听 - 标签页切换
+            orderTab.addEventListener('click', () => switchTab('order'));
+            communityTab.addEventListener('click', () => {
+                switchTab('community');
+                // 切换到社区时尝试获取位置
+                requestUserLocation();
+            });
+            
+            // 为添加按钮添加直接点击事件，确保能触发添加功能
+            document.getElementById('addButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                addOrderItem();
+            });
+            
+            // 同时保留表单提交事件，确保两种方式都能工作
+            orderForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addOrderItem();
+            });
+            
+            startTimerBtn.addEventListener('click', () => startTimer(true));
+            completeOrderBtn.addEventListener('click', completeOrder);
+            
+            // 事件监听 - 社区功能
+            submitPostBtn.addEventListener('click', addPost);
+            sortLatest.addEventListener('click', () => sortPosts('latest'));
+            sortPopular.addEventListener('click', () => sortPosts('popular'));
+            sortDistance.addEventListener('click', () => sortPosts('distance'));
+            
+            // 图片上传事件
+            imageUpload.addEventListener('change', handleImageUpload);
+            
+            // 位置权限按钮事件
+            allowLocation.addEventListener('click', () => {
+                locationPermissionGranted = true;
+                localStorage.setItem('locationPermission', 'granted');
+                locationPermission.classList.add('hidden'); // 点击允许后关闭弹窗
+                getUserLocation();
+            });
+            
+            denyLocation.addEventListener('click', () => {
+                locationPermissionGranted = false;
+                localStorage.setItem('locationPermission', 'denied');
+                locationPermission.classList.add('hidden'); // 点击不允许后关闭弹窗
+                showToast('已拒绝位置权限，将无法显示距离信息，但不影响其他功能使用', 'info');
+                renderPosts();
+            });
+        }
+        
+        // 检查位置权限状态
+        function checkLocationPermissionStatus() {
+            const savedPermission = localStorage.getItem('locationPermission');
+            if (savedPermission === 'granted') {
+                locationPermissionGranted = true;
+                getUserLocation();
+            } else if (savedPermission === 'denied') {
+                locationPermissionGranted = false;
+                locationPermission.classList.add('hidden'); // 已拒绝权限，确保弹窗关闭
+            }
+        }
+        
+        // 请求用户位置
+        function requestUserLocation() {
+            if (userLocation) return; // 已获取位置
+            
+            if (locationPermissionGranted === false) {
+                // 用户已拒绝权限，不再请求，确保弹窗关闭
+                locationPermission.classList.add('hidden');
+                return;
+            }
+            
+            if (locationPermissionGranted === null) {
+                // 首次使用，显示权限请求弹窗
+                locationPermission.classList.remove('hidden');
+            } else {
+                // 用户已允许，直接获取位置
+                getUserLocation();
+            }
+        }
+        
+        // 获取用户位置
+        function getUserLocation() {
+            if (!navigator.geolocation) {
+                showToast('您的浏览器不支持位置服务', 'error');
+                locationPermission.classList.add('hidden'); // 浏览器不支持时关闭弹窗
+                return;
+            }
+            
+            showToast('正在获取位置...');
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    // 尝试获取逆地理编码（地址文本）
+                    getAddressFromCoordinates(userLocation.lat, userLocation.lng);
+                    
+                    // 隐藏权限弹窗
+                    locationPermission.classList.add('hidden');
+                    
+                    showToast('位置获取成功');
+                    renderPosts(); // 重新渲染帖子以显示距离
+                },
+                (error) => {
+                    console.error('获取位置失败:', error);
+                    let errorMessage = '获取位置失败，请稍后重试';
+                    if (error.code === 1) {
+                        errorMessage = '位置权限被拒绝，请在设置中开启';
+                    } else if (error.code === 2) {
+                        errorMessage = '无法获取位置信息';
+                    } else if (error.code === 3) {
+                        errorMessage = '获取位置超时';
+                    }
+                    
+                    // 隐藏权限弹窗（即使失败也关闭弹窗）
+                    locationPermission.classList.add('hidden');
+                    
+                    showToast(errorMessage, 'error');
+                },
+                {
+                    enableHighAccuracy: false,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+        
+        // 将经纬度转换为地址文本
+        function getAddressFromCoordinates(lat, lng) {
+            // 使用高德地图API进行逆地理编码（示例）
+            // 实际项目中需要替换为自己的API密钥
+            const apiKey = "您的高德地图API密钥"; // 这里需要替换为实际的API密钥
+            const url = `https://restapi.amap.com/v3/geocode/regeo?location=${lng},${lat}&key=${apiKey}&radius=1000&extensions=all`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "1" && data.regeocode) {
+                        userAddress = data.regeocode.formatted_address;
+                        currentLocationInput.value = userAddress;
+                    } else {
+                        userAddress = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                        currentLocationInput.value = "无法获取详细地址，显示经纬度";
+                    }
+                })
+                .catch(error => {
+                    console.error("获取地址失败:", error);
+                    userAddress = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    currentLocationInput.value = "地址解析失败";
+                });
+        }
+        
+        // 计算两点之间的距离（公里）
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // 地球半径（公里）
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2); 
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            const distance = R * c;
+            return distance;
+        }
+        
+        // 格式化距离显示
+        function formatDistance(distance) {
+            if (distance < 1) {
+                return (distance * 1000).toFixed(0) + '米';
+            } else if (distance < 10) {
+                return distance.toFixed(1) + '公里';
+            } else {
+                return Math.round(distance) + '公里';
+            }
+        }
+        
+        // 检查外部资源加载状态
+        function checkExternalResources() {
+            // 检查Tailwind是否加载
+            if (typeof tailwind === 'undefined') {
+                console.warn('Tailwind CSS未加载，使用备用样式');
+                document.body.classList.add('tailwind-fallback');
+            }
+            
+            // 检查Font Awesome是否加载
+            const faCheck = document.createElement('i');
+            faCheck.className = 'fa fa-check';
+            if (faCheck.style.fontFamily !== '"FontAwesome"') {
+                console.warn('Font Awesome未加载，图标可能无法显示');
+            }
+        }
+        
+        // 切换标签页
+        function switchTab(tabName) {
+            if (tabName === 'order') {
+                orderSection.classList.remove('hidden');
+                communitySection.classList.add('hidden');
+                orderTab.classList.add('active');
+                communityTab.classList.remove('active');
+            } else {
+                orderSection.classList.add('hidden');
+                communitySection.classList.remove('hidden');
+                communityTab.classList.add('active');
+                orderTab.classList.remove('active');
+            }
+        }
+        
+        // 加载订单数据
+        function loadOrderData() {
+            const savedOrders = localStorage.getItem('barbecueOrders');
+            if (savedOrders) {
+                try {
+                    orderItems = JSON.parse(savedOrders);
+                    if (Array.isArray(orderItems) && orderItems.length > 0) {
+                        itemId = Math.max(...orderItems.map(item => item.id)) + 1;
+                        renderOrderList();
+                        updateTotal();
+                    }
+                } catch (e) {
+                    console.error('加载订单数据失败:', e);
+                    orderItems = [];
+                }
+            }
+            
+            // 检查计时状态
+            const savedTimerState = localStorage.getItem('orderTimerState');
+            if (savedTimerState) {
+                try {
+                    const timerState = JSON.parse(savedTimerState);
+                    if (timerState.isRunning) {
+                        elapsedSeconds = timerState.elapsedSeconds;
+                        updateTimerDisplay();
+                        startTimer(false);
+                        startTimerBtn.disabled = true;
+                        startTimerBtn.classList.remove('btn-primary');
+                        startTimerBtn.classList.add('btn-secondary');
+                        completeOrderBtn.disabled = false;
+                        completeOrderBtn.classList.remove('btn-secondary');
+                        completeOrderBtn.classList.add('btn-primary');
+                        orderStatusText.textContent = "处理中";
+                    }
+                } catch (e) {
+                    console.error('加载计时状态失败:', e);
+                }
+            }
+        }
+        
+        // 添加订单项目
+        function addOrderItem() {
+            // 直接获取表单元素，确保引用正确
+            const dishNameInput = document.getElementById('dishName');
+            const dishPriceInput = document.getElementById('dishPrice');
+            const dishQuantityInput = document.getElementById('dishQuantity');
+            
+            // 再次检查元素是否存在
+            if (!dishNameInput || !dishPriceInput || !dishQuantityInput) {
+                alert('表单元素加载失败，请刷新页面重试');
+                console.error('表单元素缺失');
+                return;
+            }
+            
+            // 获取并验证输入值
+            const dishName = dishNameInput.value.trim();
+            const dishPrice = parseFloat(dishPriceInput.value);
+            const dishQuantity = parseInt(dishQuantityInput.value, 10);
+            
+            // 验证输入
+            if (!dishName) {
+                showToast('请输入菜名', 'error');
+                dishNameInput.focus();
+                return;
+            }
+            
+            if (isNaN(dishPrice) || dishPrice <= 0) {
+                showToast('请输入有效的单价', 'error');
+                dishPriceInput.focus();
+                return;
+            }
+            
+            if (isNaN(dishQuantity) || dishQuantity <= 0) {
+                showToast('请输入有效的数量', 'error');
+                dishQuantityInput.focus();
+                return;
+            }
+            
+            // 检查是否已有相同菜品
+            const existingItemIndex = orderItems.findIndex(item => 
+                item.name.toLowerCase() === dishName.toLowerCase()
+            );
+            
+            if (existingItemIndex >= 0) {
+                // 更新现有菜品数量
+                orderItems[existingItemIndex].quantity += dishQuantity;
+                orderItems[existingItemIndex].subtotal = 
+                    orderItems[existingItemIndex].price * orderItems[existingItemIndex].quantity;
+                showToast(`已更新 "${dishName}" 的数量`, 'success');
+            } else {
+                // 添加新菜品
+                const newItem = {
+                    id: itemId++,
+                    name: dishName,
+                    price: dishPrice,
+                    quantity: dishQuantity,
+                    subtotal: dishPrice * dishQuantity
+                };
+                orderItems.push(newItem);
+                showToast(`已添加 "${dishName}" 到订单`, 'success');
+            }
+            
+            // 重置表单
+            dishNameInput.value = '';
+            dishPriceInput.value = '';
+            dishQuantityInput.value = 1;
+            
+            // 更新UI
+            renderOrderList();
+            updateTotal();
+            saveOrdersToLocalStorage();
+        }
+        
+        // 渲染订单列表
+        function renderOrderList() {
+            if (orderItems.length === 0) {
+                orderList.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                        <i class="fa fa-list-alt text-3xl mb-3 opacity-30"></i>
+                        <p class="text-sm">暂无订单，请添加菜品</p>
+                    </div>
+                `;
+                itemCountEl.textContent = '0 个菜品';
+                return;
+            }
+            
+            orderList.innerHTML = '';
+            
+            orderItems.forEach((item) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'list-item px-4';
+                itemEl.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-medium text-gray-800">${item.name}</div>
+                            <div class="text-xs text-gray-500 mt-1">单价: ¥${item.price.toFixed(2)}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium text-gray-800">¥${item.subtotal.toFixed(2)}</div>
+                            <div class="flex items-center justify-end mt-1">
+                                <button class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-red-500 decrement" data-id="${item.id}">
+                                    <i class="fa fa-minus text-xs"></i>
+                                </button>
+                                <span class="mx-2 text-sm">${item.quantity}</span>
+                                <button class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-green-500 increment" data-id="${item.id}">
+                                    <i class="fa fa-plus text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex justify-end">
+                        <button class="text-xs text-red-500 delete-btn" data-id="${item.id}">
+                            <i class="fa fa-trash-o mr-1"></i> 删除
+                        </button>
+                    </div>
+                `;
+                
+                orderList.appendChild(itemEl);
+            });
+            
+            // 绑定数量调整按钮事件
+            document.querySelectorAll('.increment').forEach(btn => {
+                btn.addEventListener('click', () => updateQuantity(btn.dataset.id, 1));
+            });
+            
+            document.querySelectorAll('.decrement').forEach(btn => {
+                btn.addEventListener('click', () => updateQuantity(btn.dataset.id, -1));
+            });
+            
+            // 绑定删除按钮事件
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => deleteOrderItem(btn.dataset.id));
+            });
+            
+            itemCountEl.textContent = `${orderItems.length} 个菜品`;
+        }
+        
+        // 更新数量
+        function updateQuantity(id, change) {
+            const itemIndex = orderItems.findIndex(item => item.id === parseInt(id));
+            
+            if (itemIndex >= 0) {
+                const newQuantity = orderItems[itemIndex].quantity + change;
+                
+                if (newQuantity < 1) {
+                    if (confirm(`确定要删除"${orderItems[itemIndex].name}"吗？`)) {
+                        deleteOrderItem(id);
+                    }
+                    return;
+                }
+                
+                orderItems[itemIndex].quantity = newQuantity;
+                orderItems[itemIndex].subtotal = orderItems[itemIndex].price * newQuantity;
+                
+                renderOrderList();
+                updateTotal();
+                saveOrdersToLocalStorage();
+                showToast('数量已更新', 'success');
+            }
+        }
+        
+        // 删除订单项目
+        function deleteOrderItem(id) {
+            const itemIndex = orderItems.findIndex(item => item.id === parseInt(id));
+            
+            if (itemIndex >= 0) {
+                const deletedItem = orderItems.splice(itemIndex, 1)[0];
+                renderOrderList();
+                updateTotal();
+                saveOrdersToLocalStorage();
+                showToast(`已删除 "${deletedItem.name}"`, 'success');
+            }
+        }
+        
+        // 更新总计金额
+        function updateTotal() {
+            const total = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
+            totalAmountEl.textContent = `¥${total.toFixed(2)}`;
+        }
+        
+        // 保存订单到本地存储
+        function saveOrdersToLocalStorage() {
+            try {
+                localStorage.setItem('barbecueOrders', JSON.stringify(orderItems));
+            } catch (e) {
+                console.error('保存订单失败:', e);
+                showToast('保存订单失败', 'error');
+            }
+        }
+        
+        // 开始计时
+        function startTimer(reset = true) {
+            if (orderItems.length === 0) {
+                showToast('请先添加菜品', 'error');
+                return;
+            }
+            
+            // 如果已有计时器，先清除
+            if (timer) {
+                clearInterval(timer);
+            }
+            
+            // 重置时间（点击开始按钮时）
+            if (reset) {
+                elapsedSeconds = 0;
+            }
+            
+            startTime = new Date(Date.now() - elapsedSeconds * 1000);
+            
+            // 更新按钮状态
+            startTimerBtn.disabled = true;
+            startTimerBtn.classList.remove('btn-primary');
+            startTimerBtn.classList.add('btn-secondary');
+            completeOrderBtn.disabled = false;
+            completeOrderBtn.classList.remove('btn-secondary');
+            completeOrderBtn.classList.add('btn-primary');
+            
+            // 更新订单状态
+            orderStatusText.textContent = "处理中";
+            
+            // 启动计时器
+            timer = setInterval(() => {
+                const now = new Date();
+                elapsedSeconds = Math.floor((now - startTime) / 1000);
+                updateTimerDisplay();
+                saveTimerState();
+            }, 1000);
+            
+            showToast('计时已开始', 'success');
+        }
+        
+        // 完成订单
+        function completeOrder() {
+            if (!timer) {
+                return;
+            }
+            
+            // 停止计时器
+            clearInterval(timer);
+            timer = null;
+            
+            // 计算总等待时间
+            const totalMinutes = Math.floor(elapsedSeconds / 60);
+            const totalSeconds = elapsedSeconds % 60;
+            const totalTime = `${totalMinutes}分${totalSeconds}秒`;
+            
+            // 更新按钮状态
+            startTimerBtn.disabled = false;
+            startTimerBtn.classList.remove('btn-secondary');
+            startTimerBtn.classList.add('btn-primary');
+            completeOrderBtn.disabled = true;
+            completeOrderBtn.classList.remove('btn-primary');
+            completeOrderBtn.classList.add('btn-secondary');
+            
+            // 更新订单状态
+            orderStatusText.textContent = `已完成 (${totalTime})`;
+            
+            showToast(`记录完成，等待时间: ${totalTime}`, 'success');
+            
+            // 保存状态
+            saveTimerState();
+        }
+        
+        // 更新计时器显示
+        function updateTimerDisplay() {
+            const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+            waitingTimeEl.textContent = `${minutes}:${seconds}`;
+        }
+        
+        // 保存计时器状态
+        function saveTimerState() {
+            const timerState = {
+                isRunning: !!timer,
+                elapsedSeconds: elapsedSeconds
+            };
+            localStorage.setItem('orderTimerState', JSON.stringify(timerState));
+        }
+        
+        // 处理图片上传
+        function handleImageUpload(e) {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            
+            // 限制最多3张图片
+            const maxImages = 3;
+            const imagesToProcess = Math.min(files.length, maxImages - uploadedImages.length);
+            
+            for (let i = 0; i < imagesToProcess; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    const imageUrl = event.target.result;
+                    uploadedImages.push(imageUrl);
+                    
+                    // 创建图片预览元素
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'image-upload-item';
+                    previewItem.innerHTML = `
+                        <img src="${imageUrl}" class="image-preview" alt="预览图">
+                        <button class="image-remove" data-index="${uploadedImages.length - 1}">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    `;
+                    
+                    // 插入到上传区域的倒数第二位（保留最后一个上传按钮）
+                    imageUploadContainer.insertBefore(previewItem, imageUploadContainer.lastChild);
+                    
+                    // 绑定删除图片事件
+                    previewItem.querySelector('.image-remove').addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index);
+                        uploadedImages.splice(index, 1);
+                        previewItem.remove();
+                        updateImageIndices(); // 更新剩余图片的索引
+                    });
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            // 重置input，允许重复选择同一文件
+            imageUpload.value = '';
+            
+            // 如果已达最大上传数量，隐藏上传按钮
+            if (uploadedImages.length >= maxImages) {
+                imageUploadContainer.lastChild.style.display = 'none';
+            } else {
+                imageUploadContainer.lastChild.style.display = 'flex';
+            }
+        }
+        
+        // 更新图片索引（删除图片后重新编号）
+        function updateImageIndices() {
+            const removeButtons = document.querySelectorAll('.image-remove');
+            removeButtons.forEach((btn, index) => {
+                btn.dataset.index = index;
+            });
+            
+            // 检查是否需要显示上传按钮
+            if (uploadedImages.length < 3) {
+                imageUploadContainer.lastChild.style.display = 'flex';
+            }
+        }
+        
+        // 社区功能 - 加载帖子数据
+        function loadPostsData() {
+            try {
+                const savedPosts = localStorage.getItem('barbecuePosts');
+                if (savedPosts) {
+                    posts = JSON.parse(savedPosts);
+                    if (!Array.isArray(posts)) {
+                        posts = [];
+                    }
+                } else {
+                    posts = [];
+                }
+                renderPosts();
+            } catch (e) {
+                console.error('加载帖子数据失败:', e);
+                posts = [];
+                renderPosts();
+            }
+        }
+        
+        // 社区功能 - 添加帖子
+        function addPost() {
+            // 检查是否有位置信息（即使没有也允许发布，只是无法计算距离）
+            if (!userLocation) {
+                showToast('注意：未获取到位置信息，将无法计算距离', 'info');
+            }
+            
+            const shopName = shopNameInput.value.trim();
+            const shopLocation = shopLocationInput.value.trim();
+            const shopPrice = parseInt(shopPriceInput.value);
+            const shopComment = shopCommentInput.value.trim();
+            
+            // 验证输入
+            if (!shopName) {
+                showToast('请输入店铺名称', 'error');
+                shopNameInput.focus();
+                return;
+            }
+            
+            if (!shopLocation) {
+                showToast('请输入店铺地址', 'error');
+                shopLocationInput.focus();
+                return;
+            }
+            
+            if (isNaN(shopPrice) || shopPrice <= 0) {
+                showToast('请输入有效的人均消费', 'error');
+                shopPriceInput.focus();
+                return;
+            }
+            
+            if (!shopComment) {
+                showToast('请输入推荐理由', 'error');
+                shopCommentInput.focus();
+                return;
+            }
+            
+            try {
+                // 创建新帖子，包含位置信息（如果有）
+                const newPost = {
+                    id: Date.now(),
+                    shopName,
+                    shopLocation,
+                    shopPrice,
+                    comment: shopComment,
+                    images: [...uploadedImages], // 复制上传的图片
+                    location: userLocation ? { // 存储店铺位置（使用用户当前位置）
+                        lat: userLocation.lat,
+                        lng: userLocation.lng
+                    } : null,
+                    likes: 0,
+                    liked: false,
+                    status: 'pending', // pending: 待展示, approved: 已审核
+                    createdAt: new Date().toISOString()
+                };
+                
+                posts.unshift(newPost);
+                savePostsData();
+                renderPosts();
+                
+                // 重置表单
+                postForm.reset();
+                // 清空上传的图片
+                uploadedImages = [];
+                // 清空预览
+                while (imageUploadContainer.children.length > 1) {
+                    imageUploadContainer.removeChild(imageUploadContainer.firstChild);
+                }
+                // 显示上传按钮
+                imageUploadContainer.lastChild.style.display = 'flex';
+                
+                showToast('推荐发布成功，等待审核！', 'success');
+            } catch (e) {
+                console.error('发布推荐失败:', e);
+                showToast('发布失败，请重试', 'error');
+            }
+        }
+        
+        // 社区功能 - 渲染帖子列表
+        function renderPosts() {
+            if (posts.length === 0) {
+                emptyPosts.classList.remove('hidden');
+                postsList.innerHTML = '';
+                return;
+            }
+            
+            emptyPosts.classList.add('hidden');
+            postsList.innerHTML = '';
+            
+            // 根据当前排序方式显示帖子
+            let sortedPosts = [...posts];
+            
+            if (currentSort === 'latest') {
+                sortedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            } else if (currentSort === 'popular') {
+                sortedPosts.sort((a, b) => b.likes - a.likes);
+            } else if (currentSort === 'distance' && userLocation) {
+                // 计算每个帖子的距离并排序
+                sortedPosts.forEach(post => {
+                    if (post.location) {
+                        post.distance = calculateDistance(
+                            userLocation.lat, 
+                            userLocation.lng, 
+                            post.location.lat, 
+                            post.location.lng
+                        );
+                    } else {
+                        post.distance = Infinity;
+                    }
+                });
+                sortedPosts.sort((a, b) => a.distance - b.distance);
+            }
+            
+            sortedPosts.forEach(post => {
+                const postEl = document.createElement('div');
+                postEl.className = 'list-item px-4';
+                
+                // 构建图片HTML
+                let imagesHtml = '';
+                if (post.images && post.images.length > 0) {
+                    imagesHtml = '<div class="post-images">';
+                    post.images.forEach(img => {
+                        imagesHtml += `
+                            <div class="post-image-item">
+                                <img src="${img}" class="image-preview" alt="店铺图片">
+                            </div>
+                        `;
+                    });
+                    imagesHtml += '</div>';
+                }
+                
+                // 状态文本和样式
+                const statusText = post.status === 'pending' ? '待展示' : '已审核';
+                const statusClass = post.status === 'pending' ? 'status-pending' : 'status-approved';
+                
+                // 距离显示
+                let distanceHtml = '';
+                if (userLocation && post.location) {
+                    distanceHtml = `
+                        <div class="flex items-center mb-1.5">
+                            <i class="fa fa-location-arrow text-primary mr-1.5 text-xs"></i>
+                            ${formatDistance(post.distance)}
+                        </div>
+                    `;
+                } else if (locationPermissionGranted === false) {
+                    distanceHtml = `
+                        <div class="flex items-center mb-1.5 text-gray-400">
+                            <i class="fa fa-location-arrow mr-1.5 text-xs"></i>
+                            未开启位置权限，无法显示距离
+                        </div>
+                    `;
+                } else if (!userLocation) {
+                    distanceHtml = `
+                        <div class="flex items-center mb-1.5 text-gray-400">
+                            <i class="fa fa-location-arrow mr-1.5 text-xs"></i>
+                            未获取位置信息，无法显示距离
+                        </div>
+                    `;
+                }
+                
+                postEl.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-medium text-gray-800">${post.shopName}</h3>
+                        <span class="${statusClass}">${statusText}</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mt-1">
+                        <span class="text-xs text-gray-500">
+                            ${formatDate(post.createdAt)}
+                        </span>
+                    </div>
+                    
+                    ${imagesHtml}
+                    
+                    <div class="mt-2 text-sm text-gray-600">
+                        <div class="flex items-center mb-1.5">
+                            <i class="fa fa-map-marker text-primary mr-1.5 text-xs"></i>
+                            ${post.shopLocation}
+                        </div>
+                        ${distanceHtml}
+                        <div class="flex items-center mb-2">
+                            <i class="fa fa-money text-primary mr-1.5 text-xs"></i>
+                            人均 ¥${post.shopPrice}
+                        </div>
+                        <div class="bg-gray-50 p-2.5 rounded text-sm">
+                            ${post.comment}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-2 flex items-center justify-between">
+                        <button class="like-btn flex items-center text-sm ${post.liked ? 'text-red-500' : 'text-gray-500'}" data-id="${post.id}">
+                            <i class="fa ${post.liked ? 'fa-heart' : 'fa-heart-o'} mr-1.5"></i>
+                            <span>${post.likes} 人觉得有用</span>
+                        </button>
+                    </div>
+                `;
+                
+                postsList.appendChild(postEl);
+            });
+            
+            // 添加点赞事件监听
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', () => toggleLike(btn.dataset.id));
+            });
+        }
+        
+        // 社区功能 - 切换点赞状态
+        function toggleLike(postId) {
+            const postIndex = posts.findIndex(post => post.id === parseInt(postId));
+            if (postIndex >= 0) {
+                if (posts[postIndex].liked) {
+                    posts[postIndex].liked = false;
+                    posts[postIndex].likes--;
+                } else {
+                    posts[postIndex].liked = true;
+                    posts[postIndex].likes++;
+                }
+                
+                savePostsData();
+                renderPosts();
+            }
+        }
+        
+        // 社区功能 - 排序帖子
+        function sortPosts(sortType) {
+            if (currentSort === sortType) return;
+            
+            currentSort = sortType;
+            
+            // 更新排序按钮样式
+            if (sortType === 'latest') {
+                sortLatest.classList.add('bg-primary', 'text-white');
+                sortLatest.classList.remove('bg-gray-100', 'text-gray-600');
+                sortPopular.classList.add('bg-gray-100', 'text-gray-600');
+                sortPopular.classList.remove('bg-primary', 'text-white');
+                sortDistance.classList.add('bg-gray-100', 'text-gray-600');
+                sortDistance.classList.remove('bg-primary', 'text-white');
+            } else if (sortType === 'popular') {
+                sortPopular.classList.add('bg-primary', 'text-white');
+                sortPopular.classList.remove('bg-gray-100', 'text-gray-600');
+                sortLatest.classList.add('bg-gray-100', 'text-gray-600');
+                sortLatest.classList.remove('bg-primary', 'text-white');
+                sortDistance.classList.add('bg-gray-100', 'text-gray-600');
+                sortDistance.classList.remove('bg-primary', 'text-white');
+            } else if (sortType === 'distance') {
+                sortDistance.classList.add('bg-primary', 'text-white');
+                sortDistance.classList.remove('bg-gray-100', 'text-gray-600');
+                sortLatest.classList.add('bg-gray-100', 'text-gray-600');
+                sortLatest.classList.remove('bg-primary', 'text-white');
+                sortPopular.classList.add('bg-gray-100', 'text-gray-600');
+                sortPopular.classList.remove('bg-primary', 'text-white');
+                
+                // 如果还没有位置信息，尝试获取
+                if (!userLocation && locationPermissionGranted !== false) {
+                    requestUserLocation();
+                }
+            }
+            
+            renderPosts();
+        }
+        
+        // 社区功能 - 保存帖子数据
+        function savePostsData() {
+            try {
+                localStorage.setItem('barbecuePosts', JSON.stringify(posts));
+            } catch (e) {
+                console.error('保存帖子数据失败:', e);
+                showToast('数据保存失败', 'error');
+            }
+        }
+        
+        // 工具函数 - 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffMins < 1) {
+                return '刚刚';
+            } else if (diffMins < 60) {
+                return `${diffMins}分钟前`;
+            } else if (diffHours < 24) {
+                return `${diffHours}小时前`;
+            } else if (diffDays < 30) {
+                return `${diffDays}天前`;
+            } else {
+                return `${date.getMonth() + 1}月${date.getDate()}日`;
+            }
+        }
+        
+        // 显示提示消息
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            
+            const icon = toast.querySelector('i');
+            if (type === 'success') {
+                icon.className = 'fa fa-check-circle mr-2 text-green-400';
+            } else if (type === 'error') {
+                icon.className = 'fa fa-exclamation-circle mr-2 text-red-400';
+            } else if (type === 'info') {
+                icon.className = 'fa fa-info-circle mr-2 text-blue-400';
+            }
+            
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body></html>
