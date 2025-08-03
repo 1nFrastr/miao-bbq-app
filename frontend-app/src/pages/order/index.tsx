@@ -1,4 +1,5 @@
 import { View, Text, Input, Button } from '@tarojs/components'
+import { AtIcon } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import './index.scss'
 
@@ -48,7 +49,8 @@ const Order = () => {
           </View>
           
           <Button className="add-button">
-            <Text className="add-button__text">➕ 添加到订单</Text>
+            <AtIcon value="add" size="16" color="#fff" />
+            <Text className="add-button__text">添加到订单</Text>
           </Button>
         </View>
       </View>
@@ -80,7 +82,7 @@ const Order = () => {
           
           {/* 空状态 - 当没有订单时显示 */}
           {/* <View className="empty-order">
-            <View className="empty-icon">📄</View>
+            <AtIcon value="file-new" size="32" color="#ccc" />
             <Text className="empty-text">暂无订单，请添加菜品</Text>
           </View> */}
         </View>
@@ -97,12 +99,12 @@ const Order = () => {
         
         <View className="action-buttons">
           <Button className="action-button action-button--primary">
-            <Text className="action-button__icon">⏱</Text>
+            <AtIcon value="clock" size="16" color="#fff" />
             <Text className="action-button__text">开始计时</Text>
           </Button>
           
           <Button className="action-button action-button--secondary">
-            <Text className="action-button__icon">✅</Text>
+            <AtIcon value="check" size="16" color="#fff" />
             <Text className="action-button__text">完成订单</Text>
           </Button>
         </View>

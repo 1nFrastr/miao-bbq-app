@@ -1,4 +1,5 @@
 import { View, Text, Input, Textarea, Button } from '@tarojs/components'
+import { AtIcon } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import './index.scss'
 
@@ -37,7 +38,7 @@ const Community = () => {
           </View>
 
           <View className="location-tip">
-            <Text className="tip-icon">�</Text>
+            <AtIcon value="map-pin" size="14" color="#666" />
             <Text className="tip-text">将使用您当前位置标记店铺位置</Text>
           </View>
 
@@ -45,7 +46,7 @@ const Community = () => {
             <Text className="form-label">上传图片 (最多3张，非必填)</Text>
             <View className="image-upload">
               <View className="upload-placeholder">
-                <Text className="upload-icon">📷</Text>
+                <AtIcon value="camera" size="24" color="#999" />
               </View>
             </View>
           </View>
@@ -60,7 +61,7 @@ const Community = () => {
           </View>
 
           <Button className="publish-btn">
-            <Text className="btn-icon">🚀</Text>
+            <AtIcon value="send" size="16" color="#fff" />
             <Text className="btn-text">发布推荐</Text>
           </Button>
         </View>
