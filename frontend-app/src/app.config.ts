@@ -1,7 +1,8 @@
-export default defineAppConfig({
+export default {
   pages: [
     'pages/order/index',
-    'pages/community/index'
+    'pages/community/index',
+    'pages/test/index'
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -25,7 +26,13 @@ export default defineAppConfig({
         text: '社区推荐',
         iconPath: 'assets/images/community.png',
         selectedIconPath: 'assets/images/community-active.png'
+      },
+      {
+        pagePath: 'pages/test/index',
+        text: 'API测试',
+        iconPath: 'assets/images/order.png',
+        selectedIconPath: 'assets/images/order-active.png'
       }
     ]
   }
-})
+}

@@ -160,10 +160,40 @@
     display: block;
   }
 
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+  }
+
   &__total {
     font-size: 28rpx;
     color: #FF6B35;
     font-weight: 600;
+  }
+}
+
+.delete-button {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #fff;
+  border: 1rpx solid #ff4757;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  
+  &:active {
+    background: #ff4757;
+    
+    .at-icon {
+      color: #fff !important;
+    }
+  }
+
+  &::after {
+    border: none;
   }
 }
 
@@ -216,6 +246,14 @@
   
   &--pending {
     color: #999;
+  }
+
+  &--ongoing {
+    color: #FF6B35;
+  }
+
+  &--completed {
+    color: #2ed573;
   }
 }
 

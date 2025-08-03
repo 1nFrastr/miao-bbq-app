@@ -1,0 +1,98 @@
+.login-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  &__content {
+    position: relative;
+    background: #fff;
+    border-radius: 24rpx;
+    padding: 48rpx;
+    margin: 0 48rpx;
+    max-width: 640rpx;
+    width: 100%;
+  }
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 48rpx;
+}
+
+.login-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  margin: 24rpx 0 16rpx;
+}
+
+.login-desc {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.5;
+}
+
+.login-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.login-button {
+  height: 88rpx;
+  background: #FF6B35;
+  border-radius: 12rpx;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  
+  &:active {
+    background: #e55a2b;
+  }
+
+  &__text {
+    font-size: 32rpx;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  &::after {
+    border: none;
+  }
+}
+
+.cancel-button {
+  height: 88rpx;
+  background: #f0f0f0;
+  border-radius: 12rpx;
+  border: none;
+  font-size: 32rpx;
+  color: #666;
+  
+  &:active {
+    background: #e0e0e0;
+  }
+
+  &::after {
+    border: none;
+  }
+}
