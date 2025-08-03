@@ -1,0 +1,43 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "启动后端服务",
+            "type": "shell",
+            "command": "source ./backend/venv/Scripts/activate && python ./backend/manage.py runserver",
+            "group": "build",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "启动小程序开发",
+            "type": "shell",
+            "command": "cd ./frontend-app && pnpm run dev:weapp",
+            "group": "build",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "启动管理端开发",
+            "type": "shell",
+            "command": "cd ./frontend-admin && pnpm run dev",
+            "group": "build",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "安装后端依赖",
+            "type": "shell",
+            "command": "source ./backend/venv/Scripts/activate && pip install -r ./backend/requirements.txt",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "运行数据库迁移",
+            "type": "shell",
+            "command": "source ./backend/venv/Scripts/activate && python ./backend/manage.py migrate",
+            "group": "build",
+            "problemMatcher": []
+        }
+    ]
+}

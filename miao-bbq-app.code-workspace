@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "name": "小程序前端",
+      "path": "./frontend-app"
+    },
+    {
+      "name": "管理端前端",
+      "path": "./frontend-admin"
+    },
+    {
+      "name": "后端",
+      "path": "./backend"
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "./backend/venv/Scripts/python.exe",
+    "typescript.preferences.packageManager": "pnpm"
+  }
+}
