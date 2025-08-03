@@ -144,7 +144,7 @@ const OrderPage = () => {
       if (currentOrder) {
         // 添加到现有订单
         await OrderAPI.addItem(currentOrder.id, itemData)
-        MessageUtils.showSuccess('菜品添加成功')
+        // 移除了烦人的成功提示
       } else {
         // 创建新订单
         const newOrder = await OrderAPI.createOrder({
@@ -152,7 +152,7 @@ const OrderPage = () => {
           items: [itemData]
         })
         setCurrentOrder(newOrder)
-        MessageUtils.showSuccess('订单创建成功')
+        // 移除了烦人的成功提示
       }
 
       // 重新加载订单数据
@@ -181,7 +181,7 @@ const OrderPage = () => {
       setIsLoading(true)
       await OrderAPI.removeItem(currentOrder.id, itemId)
       await loadCurrentOrder()
-      MessageUtils.showSuccess('菜品删除成功')
+      // 移除了烦人的成功提示
     } catch (error) {
       console.error('删除菜品失败:', error)
     } finally {
@@ -197,7 +197,7 @@ const OrderPage = () => {
       setIsLoading(true)
       await OrderAPI.startTimer(currentOrder.id)
       await loadCurrentOrder()
-      MessageUtils.showSuccess('开始计时')
+      // 移除了烦人的成功提示
     } catch (error) {
       console.error('开始计时失败:', error)
     } finally {
@@ -224,6 +224,7 @@ const OrderPage = () => {
       setTimer(0)
       setCurrentOrder(null)
       
+      // 移除了烦人的成功提示，订单完成这种重要操作可以保留提示
       MessageUtils.showSuccess('订单已完成')
     } catch (error) {
       console.error('完成订单失败:', error)
