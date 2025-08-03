@@ -128,12 +128,12 @@ const My = () => {
             <Text className="user-id">ID: {userInfo?.id}</Text>
           </View>
         </View>
-        <View className="user-stats">
+        {/* <View className="user-stats">
           <View className="stat-item">
             <Text className="stat-number">{orders.length}</Text>
             <Text className="stat-label">订单数</Text>
           </View>
-        </View>
+        </View> */}
       </View>
 
       {/* 功能菜单 */}
