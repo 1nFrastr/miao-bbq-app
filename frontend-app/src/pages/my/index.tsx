@@ -65,7 +65,7 @@ const My = () => {
   // 查看订单详情
   const handleOrderDetail = useCallback((orderId: number) => {
     Taro.navigateTo({
-      url: `/pages/order/index?orderId=${orderId}`
+      url: `/pages/order-detail/index?orderId=${orderId}`
     })
   }, [])
 

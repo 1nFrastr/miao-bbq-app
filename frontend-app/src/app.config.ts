@@ -3,7 +3,8 @@ export default {
     'pages/order/index',
     'pages/community/index',
     'pages/my/index',
-    'pages/login/index'
+    'pages/login/index',
+    'pages/order-detail/index'
   ],
   window: {
     backgroundTextStyle: 'light',
