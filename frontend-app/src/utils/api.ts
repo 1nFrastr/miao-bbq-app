@@ -1,7 +1,7 @@
 import Taro from '@tarojs/taro'
 
 // API配置
-const API_BASE_URL = 'http://localhost:8000/api'
+const API_BASE_URL = 'https://bbq-backend.sodair.top/api'
 
 // 请求拦截器配置
 interface RequestConfig {
