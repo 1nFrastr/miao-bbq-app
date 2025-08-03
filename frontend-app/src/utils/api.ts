@@ -141,8 +141,10 @@ export class OrderAPI {
 
 // 用户相关API
 export class UserAPI {
-  // 用户登录/注册
+  // 用户登录/注册 - 支持微信code登录
   static async login(userData: {
+    code: string
+  } | {
     openid: string
     unionid?: string
     nickname: string

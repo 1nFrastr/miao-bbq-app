@@ -5,6 +5,46 @@
   padding-bottom: 220rpx; /* 为底部固定区域留出空间 */
 }
 
+/* 登录提示 */
+.login-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 80rpx 60rpx;
+  text-align: center;
+
+  &__title {
+    font-size: 36rpx;
+    font-weight: 600;
+    color: #333;
+    margin: 32rpx 0 16rpx;
+  }
+
+  &__desc {
+    font-size: 28rpx;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 60rpx;
+  }
+
+  &__btn {
+    width: 300rpx;
+    height: 80rpx;
+    background: #FF6B35;
+    border: none;
+    border-radius: 40rpx;
+    font-size: 32rpx;
+    font-weight: 500;
+    color: #fff;
+    
+    &:active {
+      background: #e55a2b;
+    }
+  }
+}
+
 /* 添加菜品部分 */
 .add-dish-section {
   background: #fff;

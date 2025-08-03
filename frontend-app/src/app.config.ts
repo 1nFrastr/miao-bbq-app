@@ -2,7 +2,8 @@ export default {
   pages: [
     'pages/order/index',
     'pages/community/index',
-    'pages/test/index'
+    'pages/test/index',
+    'pages/login/index'
   ],
   window: {
     backgroundTextStyle: 'light',

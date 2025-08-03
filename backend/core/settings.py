@@ -157,3 +157,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# 微信小程序配置
+# 注意：在生产环境中，这些配置应该通过环境变量设置
+WECHAT_APP_ID = 'your_wechat_app_id'  # 替换为实际的小程序AppID
+WECHAT_APP_SECRET = 'your_wechat_app_secret'  # 替换为实际的小程序AppSecret

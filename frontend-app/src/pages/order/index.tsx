@@ -19,10 +19,35 @@ const OrderPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [timer, setTimer] = useState(0)
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null)
+  
+  // 登录状态
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   Taro.useLoad(() => {
     console.log('订单页面加载')
-    loadCurrentOrder()
+    checkLoginAndLoadOrder()
+  })
+
+  // 检查登录状态并加载订单
+  const checkLoginAndLoadOrder = useCallback(async () => {
+    const loggedIn = AuthService.isLoggedIn()
+    setIsLoggedIn(loggedIn)
+    
+    if (loggedIn) {
+      await loadCurrentOrder()
+    }
+  }, [])
+
+  // 处理登录
+  const handleLogin = useCallback(async () => {
+    Taro.navigateTo({
+      url: '/pages/login/index'
+    })
+  }, [])
+
+  Taro.useDidShow(() => {
+    // 页面显示时重新检查登录状态
+    checkLoginAndLoadOrder()
   })
 
   // 加载当前进行中的订单
@@ -103,12 +128,6 @@ const OrderPage = () => {
 
   // 添加菜品到订单
   const handleAddItem = useCallback(async () => {
-    // 检查登录状态
-    const isAuthenticated = await AuthService.checkAuthOrLogin()
-    if (!isAuthenticated) {
-      return
-    }
-
     if (!validateForm()) {
       return
     }
@@ -218,11 +237,27 @@ const OrderPage = () => {
 
   return (
     <View className="order-page">
-      {/* 添加菜品表单 */}
-      <View className="add-dish-section">
-        <View className="section-title">
-          <Text className="section-title__text">添加菜品</Text>
+      {!isLoggedIn ? (
+        // 未登录状态
+        <View className="login-prompt">
+          <AtIcon value="user" size="64" color="#ccc" />
+          <Text className="login-prompt__title">请先登录</Text>
+          <Text className="login-prompt__desc">登录后即可使用烧烤点单记录功能</Text>
+          <Button 
+            className="login-prompt__btn"
+            type="primary"
+            onClick={handleLogin}
+          >
+            立即登录
+          </Button>
         </View>
+      ) : (
+        <>
+          {/* 添加菜品表单 */}
+          <View className="add-dish-section">
+            <View className="section-title">
+              <Text className="section-title__text">添加菜品</Text>
+            </View>
         
         <View className="form-container">
           <View className="form-item">
@@ -351,6 +386,8 @@ const OrderPage = () => {
           <Text className="total-price">¥{totalAmount.toFixed(2)}</Text>
         </View>
       </View>
+        </>
+      )}
     </View>
   )
 }
