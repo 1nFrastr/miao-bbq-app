@@ -2,7 +2,7 @@ export default {
   pages: [
     'pages/order/index',
     'pages/community/index',
-    'pages/test/index',
+    'pages/my/index',
     'pages/login/index'
   ],
   window: {
@@ -29,8 +29,8 @@ export default {
         selectedIconPath: 'assets/images/community-active.png'
       },
       {
-        pagePath: 'pages/test/index',
-        text: 'API测试',
+        pagePath: 'pages/my/index',
+        text: '我的',
         iconPath: 'assets/images/order.png',
         selectedIconPath: 'assets/images/order-active.png'
       }

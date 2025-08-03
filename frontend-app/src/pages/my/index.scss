@@ -1,0 +1,220 @@
+.my-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+
+  .login-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 160px 40px;
+    background: white;
+
+    .prompt-text {
+      font-size: 32px;
+      color: #999;
+      margin: 40px 0 60px;
+    }
+
+    .login-btn {
+      background: linear-gradient(135deg, #FF6B35 0%, #FF8A65 100%);
+      color: white;
+      padding: 24px 60px;
+      border-radius: 50px;
+      font-size: 32px;
+
+      &:active {
+        opacity: 0.8;
+      }
+
+      .btn-text {
+        color: white;
+      }
+    }
+  }
+
+  .user-header {
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8A65 100%);
+    padding: 60px 40px 40px;
+    color: white;
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 40px;
+
+      .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        margin-right: 30px;
+        position: relative;
+        overflow: hidden;
+
+        .avatar-img {
+          width: 100%;
+          height: 100%;
+          border-radius: 60px;
+        }
+
+        .avatar-placeholder {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.3);
+        }
+      }
+
+      .user-details {
+        flex: 1;
+
+        .nickname {
+          display: block;
+          font-size: 36px;
+          font-weight: bold;
+          margin-bottom: 12px;
+        }
+
+        .user-id {
+          font-size: 24px;
+          opacity: 0.8;
+        }
+      }
+    }
+
+    .user-stats {
+      display: flex;
+      justify-content: space-around;
+
+      .stat-item {
+        text-align: center;
+
+        .stat-number {
+          display: block;
+          font-size: 40px;
+          font-weight: bold;
+          margin-bottom: 8px;
+        }
+
+        .stat-label {
+          font-size: 24px;
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+
+  .menu-section {
+    margin: 20px 0;
+    background: white;
+  }
+
+  .order-history {
+    background: white;
+    margin-top: 20px;
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 30px 40px 20px;
+      border-bottom: 2px solid #f5f5f5;
+
+      .section-title {
+        font-size: 32px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .section-more {
+        font-size: 28px;
+        color: #FF6B35;
+      }
+    }
+
+    .loading {
+      padding: 80px 0;
+      text-align: center;
+      color: #999;
+      font-size: 28px;
+    }
+
+    .order-list {
+      .order-item {
+        padding: 30px 40px;
+        border-bottom: 2px solid #f8f8f8;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:active {
+          background-color: #f8f8f8;
+        }
+
+        .order-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+
+          .order-id {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+          }
+
+          .order-status {
+            font-size: 24px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.05);
+          }
+        }
+
+        .order-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+
+          .order-items {
+            font-size: 28px;
+            color: #666;
+          }
+
+          .order-amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FF6B35;
+          }
+        }
+
+        .order-time {
+          font-size: 24px;
+          color: #999;
+        }
+      }
+    }
+
+    .empty-orders {
+      padding: 120px 40px;
+      text-align: center;
+
+      .empty-text {
+        display: block;
+        font-size: 32px;
+        color: #999;
+        margin: 30px 0 16px;
+      }
+
+      .empty-tip {
+        font-size: 24px;
+        color: #ccc;
+      }
+    }
+  }
+}
