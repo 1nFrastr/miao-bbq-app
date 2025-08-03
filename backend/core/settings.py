@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# 加载环境变量
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-!vq1!=^6$fx!2*h-(#+$z!4%3vy(u+%m1$%q2%phpt^rjys6^z"
+SECRET_KEY = os.getenv('SECRET_KEY', "django-insecure-!vq1!=^6$fx!2*h-(#+$z!4%3vy(u+%m1$%q2%phpt^rjys6^z")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = []
 
@@ -80,12 +85,30 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# 数据库配置 - 支持SQLite和MySQL
+db_engine = os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
+
+if db_engine == 'django.db.backends.sqlite3':
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / os.getenv('DB_NAME', 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": os.getenv('DB_ENGINE', 'django.db.backends.mysql'),
+            "NAME": os.getenv('DB_NAME', 'miao_bbq_db'),
+            "USER": os.getenv('DB_USER', 'root'),
+            "PASSWORD": os.getenv('DB_PASSWORD', ''),
+            "HOST": os.getenv('DB_HOST', 'localhost'),
+            "PORT": os.getenv('DB_PORT', '3306'),
+            "OPTIONS": {
+                'charset': 'utf8mb4',
+            },
+        }
+    }
 
 
 # Password validation
@@ -160,5 +183,5 @@ CORS_ALLOW_CREDENTIALS = True
 
 # 微信小程序配置
 # 注意：在生产环境中，这些配置应该通过环境变量设置
-WECHAT_APP_ID = 'your_wechat_app_id'  # 替换为实际的小程序AppID
-WECHAT_APP_SECRET = 'your_wechat_app_secret'  # 替换为实际的小程序AppSecret
+WECHAT_APP_ID = os.getenv('WECHAT_APP_ID', 'your_wechat_app_id')  # 替换为实际的小程序AppID
+WECHAT_APP_SECRET = os.getenv('WECHAT_APP_SECRET', 'your_wechat_app_secret')  # 替换为实际的小程序AppSecret

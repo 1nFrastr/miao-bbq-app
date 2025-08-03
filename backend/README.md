@@ -8,7 +8,8 @@
 
 - **后端框架**: Django 5.2.4
 - **API框架**: Django REST Framework 3.16.0
-- **数据库**: SQLite (开发环境)
+- **数据库**: MySQL (生产环境), SQLite (开发环境)
+- **数据库驱动**: mysqlclient 2.2.4
 - **跨域处理**: django-cors-headers
 - **其他依赖**: requests, Pillow, python-dotenv
 
@@ -126,18 +127,78 @@ backend/
 # 1. 激活虚拟环境
 source ./backend/venv/Scripts/activate
 
-# 2. 安装依赖
+# 2. 配置数据库
+# 创建MySQL数据库（如果使用MySQL）
+mysql -u root -p < ./backend/init_mysql.sql
+
+# 配置环境变量
+cp ./backend/.env.example ./backend/.env
+# 编辑 .env 文件，设置正确的数据库连接信息
+
+# 3. 安装依赖
 pip install -r ./backend/requirements.txt
 
-# 3. 运行数据库迁移
+# 4. 运行数据库迁移
 python ./backend/manage.py migrate
 
-# 4. 创建测试数据
+# 5. 创建测试数据
 python ./backend/manage.py init_test_data
 
-# 5. 启动服务
+# 6. 启动服务
 python ./backend/manage.py runserver
 ```
+
+### 数据库配置
+
+#### MySQL配置 (推荐生产环境)
+1. 安装MySQL服务器
+2. 运行初始化脚本创建数据库:
+   ```bash
+   mysql -u root -p < ./backend/init_mysql.sql
+   ```
+3. 在`.env`文件中配置数据库连接:
+   ```
+   DB_ENGINE=django.db.backends.mysql
+   DB_NAME=miao_bbq_db
+   DB_USER=root
+   DB_PASSWORD=your_mysql_password
+   DB_HOST=localhost
+   DB_PORT=3306
+   ```
+
+#### SQLite配置 (开发环境)
+如果要使用SQLite，在`.env`文件中配置:
+```
+DB_ENGINE=django.db.backends.sqlite3
+DB_NAME=db.sqlite3
+```
+
+### 数据库管理
+
+项目提供了便捷的数据库管理脚本 `db_manager.sh`：
+
+```bash
+# 切换到SQLite（开发环境）
+./db_manager.sh sqlite
+
+# 切换到MySQL（生产环境）
+./db_manager.sh mysql
+
+# 运行数据库迁移
+./db_manager.sh migrate
+
+# 初始化MySQL数据库
+./db_manager.sh init_mysql
+
+# 重置数据库
+./db_manager.sh reset
+```
+
+### 环境配置文件说明
+
+- `.env` - 当前使用的环境配置
+- `.env.example` - 配置模板文件
+- `.env.mysql` - MySQL生产环境配置模板
 
 ### 测试数据
 运行初始化脚本后，系统会创建：

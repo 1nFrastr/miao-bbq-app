@@ -38,6 +38,27 @@
             "command": "source ./backend/venv/Scripts/activate && python ./backend/manage.py migrate",
             "group": "build",
             "problemMatcher": []
+        },
+        {
+            "label": "切换到MySQL数据库",
+            "type": "shell",
+            "command": "cd ./backend && cp .env.mysql .env && echo \"已切换到MySQL数据库配置\"",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "切换到SQLite数据库",
+            "type": "shell",
+            "command": "cd ./backend && cp .env.example .env && echo \"已切换到SQLite数据库配置\"",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "初始化MySQL数据库",
+            "type": "shell",
+            "command": "mysql -u root -p < ./backend/init_mysql.sql",
+            "group": "build",
+            "problemMatcher": []
         }
     ]
 }
