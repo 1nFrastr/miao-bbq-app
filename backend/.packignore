@@ -1,0 +1,51 @@
+# 项目打包排除文件列表
+# 用于7zip、WinRAR等Windows压缩工具
+
+# Python缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 日志文件
+*.log
+logs/
+
+# 开发环境配置
+.env
+.vscode/
+.idea/
+
+# 静态文件（部署时重新生成）
+staticfiles/
+static_collected/
+
+# 媒体文件上传目录
+media/
+
+# Git文件
+.git/
+.gitignore
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 测试文件
+test_*.py
+*_test.py
+tests/
+
+# 文档文件
+*.md
+docs/
