@@ -31,8 +31,8 @@ export default {
       {
         pagePath: 'pages/my/index',
         text: '我的',
-        iconPath: 'assets/images/order.png',
-        selectedIconPath: 'assets/images/order-active.png'
+        iconPath: 'assets/images/user.png',
+        selectedIconPath: 'assets/images/user-active.png'
       }
     ]
   }
