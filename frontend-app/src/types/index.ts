@@ -2,19 +2,23 @@
 export interface OrderItem {
   id: number
   dish_name: string
-  unit_price: number
+  unit_price: number | string  // 后端可能返回字符串
   quantity: number
-  total_price: number
+  subtotal: number | string    // 后端字段名是subtotal，不是total_price
+  created_at: string
+  updated_at: string
 }
 
 export interface Order {
   id: number
-  user: number
-  status: 'pending' | 'ongoing' | 'completed'
+  user: any  // 用户对象，不只是id
+  status: 'pending' | 'processing' | 'completed'  // 后端用processing而不是ongoing
   items: OrderItem[]
-  total_amount: number
-  start_time?: string
-  end_time?: string
+  total_amount: number | string  // 后端可能返回字符串
+  item_count: number
+  start_time?: string | null
+  complete_time?: string | null  // 后端字段名是complete_time
+  waiting_seconds: number
   created_at: string
   updated_at: string
 }

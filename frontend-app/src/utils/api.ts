@@ -17,6 +17,8 @@ export const request = async <T = any>(config: RequestConfig): Promise<T> => {
     // 获取用户openid用于认证
     const openid = Taro.getStorageSync('user_openid')
     
+    console.log('API请求:', `${API_BASE_URL}${config.url}`, config.method, config.data)
+    
     const response = await Taro.request({
       url: `${API_BASE_URL}${config.url}`,
       method: config.method || 'GET',
@@ -28,8 +30,10 @@ export const request = async <T = any>(config: RequestConfig): Promise<T> => {
       }
     })
 
+    console.log('API响应:', response.statusCode, response.data)
+
     // 处理响应
-    if (response.statusCode === 200) {
+    if (response.statusCode === 200 || response.statusCode === 201) {
       // 如果是分页数据，直接返回
       if (response.data.results !== undefined) {
         return response.data as T
@@ -41,15 +45,27 @@ export const request = async <T = any>(config: RequestConfig): Promise<T> => {
       // 否则直接返回响应数据
       return response.data as T
     } else {
-      throw new Error(response.data?.error || '请求失败')
+      const errorMsg = response.data?.error || response.data?.detail || '请求失败'
+      throw new Error(errorMsg)
     }
   } catch (error: any) {
     console.error('API请求失败:', error)
-    Taro.showToast({
-      title: error.message || '网络请求失败',
-      icon: 'error',
-      duration: 2000
-    })
+    
+    // 只在非网络错误时显示toast
+    if (error.errMsg && error.errMsg.includes('request:fail')) {
+      console.error('网络请求失败，请检查网络连接和服务器状态')
+      Taro.showToast({
+        title: '网络连接失败',
+        icon: 'error',
+        duration: 2000
+      })
+    } else {
+      Taro.showToast({
+        title: error.message || '请求失败',
+        icon: 'error',
+        duration: 2000
+      })
+    }
     throw error
   }
 }

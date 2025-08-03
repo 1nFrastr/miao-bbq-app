@@ -66,11 +66,11 @@ const OrderPage = () => {
       if (response.results && response.results.length > 0) {
         const order = response.results[0]
         // 只显示进行中或待开始的订单
-        if (order.status === 'pending' || order.status === 'ongoing') {
+        if (order.status === 'pending' || order.status === 'processing') {
           setCurrentOrder(order)
           
           // 如果订单正在进行中，开始计时器
-          if (order.status === 'ongoing' && order.start_time) {
+          if (order.status === 'processing' && order.start_time) {
             startTimerFromOrder(order)
           }
         }
@@ -232,8 +232,11 @@ const OrderPage = () => {
     }
   }, [currentOrder, timerInterval])
 
-  // 计算总金额
-  const totalAmount = currentOrder?.items.reduce((sum, item) => sum + item.total_price, 0) || 0
+  // 计算总金额 - 处理字符串和数字类型
+  const totalAmount = currentOrder?.items.reduce((sum, item) => {
+    const subtotal = typeof item.subtotal === 'string' ? parseFloat(item.subtotal) : item.subtotal
+    return sum + subtotal
+  }, 0) || 0
 
   return (
     <View className="order-page">
@@ -322,10 +325,14 @@ const OrderPage = () => {
               <View key={item.id} className="order-item">
                 <View className="order-item__info">
                   <Text className="order-item__name">{item.dish_name}</Text>
-                  <Text className="order-item__price">¥{item.unit_price.toFixed(2)} × {item.quantity}</Text>
+                  <Text className="order-item__price">
+                    ¥{(typeof item.unit_price === 'string' ? parseFloat(item.unit_price) : item.unit_price).toFixed(2)} × {item.quantity}
+                  </Text>
                 </View>
                 <View className="order-item__actions">
-                  <Text className="order-item__total">¥{item.total_price.toFixed(2)}</Text>
+                  <Text className="order-item__total">
+                    ¥{(typeof item.subtotal === 'string' ? parseFloat(item.subtotal) : item.subtotal).toFixed(2)}
+                  </Text>
                   <Button 
                     className="delete-button"
                     size="mini"
@@ -351,7 +358,7 @@ const OrderPage = () => {
           <Text className="status-label">订单状态：</Text>
           <Text className={`status-value status-value--${currentOrder?.status || 'pending'}`}>
             {currentOrder?.status === 'pending' && '未开始'}
-            {currentOrder?.status === 'ongoing' && '进行中'}
+            {currentOrder?.status === 'processing' && '进行中'}
             {currentOrder?.status === 'completed' && '已完成'}
             {!currentOrder && '无订单'}
           </Text>
