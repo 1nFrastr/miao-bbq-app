@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', "django-insecure-!vq1!=^6$fx!2*h-(#+
 DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() == 'true'
 
 # 允许的主机
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',') if os.getenv('DJANGO_ALLOWED_HOSTS') else ['*']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
