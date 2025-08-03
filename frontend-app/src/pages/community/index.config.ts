@@ -1,3 +1,3 @@
-export default definePageConfig({
-  navigationBarTitleText: '社区推荐',
-})
+export default {
+  navigationBarTitleText: '社区推荐'
+}

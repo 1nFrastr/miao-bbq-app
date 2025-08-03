@@ -1,201 +1,33 @@
+/* 社区推荐页面样式 */
 .community-page {
-  padding: 20px;
-  background-color: #f5f5f5;
   min-height: 100vh;
-
-  .publish-card {
-    margin-bottom: 20px;
-    
-    .image-upload-section {
-      margin: 20px 0;
-      
-      .upload-label {
-        display: block;
-        font-size: 14px;
-        color: #333;
-        margin-bottom: 10px;
-      }
-    }
-    
-    .comment-section {
-      margin: 20px 0;
-      
-      .comment-label {
-        display: block;
-        font-size: 14px;
-        color: #333;
-        margin-bottom: 10px;
-      }
-      
-      .comment-textarea {
-        width: 100%;
-        min-height: 80px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        resize: vertical;
-        background-color: #fff;
-      }
-    }
-    
-    .publish-button {
-      margin-top: 20px;
-      background-color: #FF6B35;
-      border-color: #FF6B35;
-      
-      &:hover {
-        background-color: #e55a2b;
-        border-color: #e55a2b;
-      }
-    }
-  }
-
-  .posts-card {
-    .sort-buttons {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      
-      .at-button {
-        flex: 1;
-        
-        &.at-button--primary {
-          background-color: #FF6B35;
-          border-color: #FF6B35;
-        }
-        
-        &.at-button--secondary {
-          background-color: #f8f9fa;
-          border-color: #dee2e6;
-          color: #6c757d;
-        }
-      }
-    }
-    
-    .posts-scroll {
-      max-height: 600px;
-    }
-    
-    .empty-posts {
-      padding: 60px 20px;
-      text-align: center;
-      color: #999;
-      
-      .empty-text {
-        font-size: 14px;
-      }
-    }
-    
-    .posts-list {
-      .post-item {
-        background: white;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        
-        .post-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 10px;
-          
-          .shop-name {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-          }
-          
-          .post-meta {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-            
-            .post-time {
-              font-size: 12px;
-              color: #999;
-            }
-            
-            .post-distance {
-              font-size: 12px;
-              color: #FF6B35;
-              font-weight: bold;
-            }
-          }
-        }
-        
-        .post-info {
-          margin-bottom: 10px;
-          
-          .shop-address, .shop-price {
-            display: block;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 4px;
-          }
-        }
-        
-        .post-images {
-          display: flex;
-          gap: 8px;
-          margin: 10px 0;
-          overflow-x: auto;
-          
-          .post-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 6px;
-            flex-shrink: 0;
-          }
-        }
-        
-        .post-comment {
-          font-size: 14px;
-          line-height: 1.4;
-          color: #333;
-          background-color: #f8f9fa;
-          padding: 10px;
-          border-radius: 6px;
-          border-left: 3px solid #FF6B35;
-        }
-      }
-    }
-  }
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-// 位置权限弹窗样式
-.permission-content {
+.coming-soon {
   text-align: center;
-  padding: 20px 0;
-  
-  .permission-note {
+  padding: 80rpx;
+
+  &__icon {
+    font-size: 120rpx;
     display: block;
-    font-size: 12px;
+    margin-bottom: 32rpx;
+  }
+
+  &__title {
+    font-size: 40rpx;
+    color: #333;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 16rpx;
+  }
+
+  &__desc {
+    font-size: 28rpx;
     color: #999;
-    margin-top: 10px;
-  }
-}
-
-// taro-ui 组件样式覆盖
-.at-card {
-  margin-bottom: 0;
-  
-  .at-card__header {
-    background-color: #FF6B35;
-    color: white;
-    font-weight: bold;
-  }
-}
-
-.at-image-picker {
-  .at-image-picker__flex-box {
-    justify-content: flex-start;
-  }
-  
-  .at-image-picker__flex-item {
-    margin-right: 10px;
-    margin-bottom: 10px;
+    display: block;
   }
 }
