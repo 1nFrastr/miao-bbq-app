@@ -40,25 +40,34 @@ class UserViewSet(viewsets.ModelViewSet):
         # 如果提供了code，通过微信API获取openid
         if code:
             try:
-                # 调用微信API获取openid
-                wx_response = requests.get(
-                    'https://api.weixin.qq.com/sns/jscode2session',
-                    params={
-                        'appid': getattr(settings, 'WECHAT_APP_ID', ''),
-                        'secret': getattr(settings, 'WECHAT_APP_SECRET', ''),
-                        'js_code': code,
-                        'grant_type': 'authorization_code'
-                    }
-                )
-                wx_data = wx_response.json()
+                # 检查是否配置了真实的微信参数
+                app_id = getattr(settings, 'WECHAT_APP_ID', '')
+                app_secret = getattr(settings, 'WECHAT_APP_SECRET', '')
                 
-                if 'errcode' in wx_data:
-                    logger.error(f"微信API错误: {wx_data}")
-                    return Response({'error': '微信登录失败'}, status=status.HTTP_400_BAD_REQUEST)
-                
-                openid = wx_data.get('openid')
-                if not openid:
-                    return Response({'error': '获取openid失败'}, status=status.HTTP_400_BAD_REQUEST)
+                if app_id.startswith('your_') or app_secret.startswith('your_') or not app_id or not app_secret:
+                    # 开发模式：使用模拟的openid
+                    logger.info("使用开发模式登录，跳过微信API调用")
+                    openid = f"dev_openid_{code[-8:]}"  # 使用code的后8位作为模拟openid
+                else:
+                    # 生产模式：调用微信API获取openid
+                    wx_response = requests.get(
+                        'https://api.weixin.qq.com/sns/jscode2session',
+                        params={
+                            'appid': app_id,
+                            'secret': app_secret,
+                            'js_code': code,
+                            'grant_type': 'authorization_code'
+                        }
+                    )
+                    wx_data = wx_response.json()
+                    
+                    if 'errcode' in wx_data:
+                        logger.error(f"微信API错误: {wx_data}")
+                        return Response({'error': '微信登录失败'}, status=status.HTTP_400_BAD_REQUEST)
+                    
+                    openid = wx_data.get('openid')
+                    if not openid:
+                        return Response({'error': '获取openid失败'}, status=status.HTTP_400_BAD_REQUEST)
                     
             except Exception as e:
                 logger.error(f"调用微信API异常: {e}")
