@@ -372,7 +372,7 @@
         const imageUploadContainer = document.getElementById('imageUploadContainer');
         const currentLocationInput = document.getElementById('currentLocation');
         
-        // 位置权限相关元素
+        // 位置权限相关元素 - 因为HTML中被注释掉，这些元素可能为null
         const locationPermission = document.getElementById('locationPermission');
         const allowLocation = document.getElementById('allowLocation');
         const denyLocation = document.getElementById('denyLocation');
@@ -433,21 +433,25 @@
             // 图片上传事件
             imageUpload.addEventListener('change', handleImageUpload);
             
-            // 位置权限按钮事件
-            allowLocation.addEventListener('click', () => {
-                locationPermissionGranted = true;
-                localStorage.setItem('locationPermission', 'granted');
-                locationPermission.classList.add('hidden'); // 点击允许后关闭弹窗
-                getUserLocation();
-            });
+            // 位置权限按钮事件 - 只有当元素存在时才添加监听器
+            if (allowLocation) {
+                allowLocation.addEventListener('click', () => {
+                    locationPermissionGranted = true;
+                    localStorage.setItem('locationPermission', 'granted');
+                    if (locationPermission) locationPermission.classList.add('hidden'); // 点击允许后关闭弹窗
+                    getUserLocation();
+                });
+            }
             
-            denyLocation.addEventListener('click', () => {
-                locationPermissionGranted = false;
-                localStorage.setItem('locationPermission', 'denied');
-                locationPermission.classList.add('hidden'); // 点击不允许后关闭弹窗
-                showToast('已拒绝位置权限，将无法显示距离信息，但不影响其他功能使用', 'info');
-                renderPosts();
-            });
+            if (denyLocation) {
+                denyLocation.addEventListener('click', () => {
+                    locationPermissionGranted = false;
+                    localStorage.setItem('locationPermission', 'denied');
+                    if (locationPermission) locationPermission.classList.add('hidden'); // 点击不允许后关闭弹窗
+                    showToast('已拒绝位置权限，将无法显示距离信息，但不影响其他功能使用', 'info');
+                    renderPosts();
+                });
+            }
         }
         
         // 检查位置权限状态
@@ -458,7 +462,7 @@
                 getUserLocation();
             } else if (savedPermission === 'denied') {
                 locationPermissionGranted = false;
-                locationPermission.classList.add('hidden'); // 已拒绝权限，确保弹窗关闭
+                if (locationPermission) locationPermission.classList.add('hidden'); // 已拒绝权限，确保弹窗关闭
             }
         }
         
@@ -468,13 +472,18 @@
             
             if (locationPermissionGranted === false) {
                 // 用户已拒绝权限，不再请求，确保弹窗关闭
-                locationPermission.classList.add('hidden');
+                if (locationPermission) locationPermission.classList.add('hidden');
                 return;
             }
             
             if (locationPermissionGranted === null) {
-                // 首次使用，显示权限请求弹窗
-                locationPermission.classList.remove('hidden');
+                // 首次使用，显示权限请求弹窗（如果弹窗元素存在）
+                if (locationPermission) {
+                    locationPermission.classList.remove('hidden');
+                } else {
+                    // 如果弹窗不存在，直接尝试获取位置
+                    getUserLocation();
+                }
             } else {
                 // 用户已允许，直接获取位置
                 getUserLocation();
@@ -485,7 +494,7 @@
         function getUserLocation() {
             if (!navigator.geolocation) {
                 showToast('您的浏览器不支持位置服务', 'error');
-                locationPermission.classList.add('hidden'); // 浏览器不支持时关闭弹窗
+                if (locationPermission) locationPermission.classList.add('hidden'); // 浏览器不支持时关闭弹窗
                 return;
             }
             
@@ -502,7 +511,7 @@
                     getAddressFromCoordinates(userLocation.lat, userLocation.lng);
                     
                     // 隐藏权限弹窗
-                    locationPermission.classList.add('hidden');
+                    if (locationPermission) locationPermission.classList.add('hidden');
                     
                     showToast('位置获取成功');
                     renderPosts(); // 重新渲染帖子以显示距离
@@ -519,7 +528,7 @@
                     }
                     
                     // 隐藏权限弹窗（即使失败也关闭弹窗）
-                    locationPermission.classList.add('hidden');
+                    if (locationPermission) locationPermission.classList.add('hidden');
                     
                     showToast(errorMessage, 'error');
                 },
