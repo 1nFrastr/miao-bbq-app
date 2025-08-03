@@ -217,18 +217,18 @@
   width: 56rpx;
   height: 56rpx;
   border-radius: 50%;
-  background: #fff;
-  border: 1rpx solid #ff4757;
+  background: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   
   &:active {
-    background: #ff4757;
+    background: rgba(255, 71, 87, 0.1);
     
     .at-icon {
-      color: #fff !important;
+      color: #ff4757 !important;
     }
   }
 
