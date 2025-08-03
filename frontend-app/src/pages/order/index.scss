@@ -1,0 +1,149 @@
+.order-page {
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+
+  .form-card {
+    margin-bottom: 20px;
+    
+    .price-quantity-row {
+      display: flex;
+      gap: 10px;
+      
+      .at-input {
+        flex: 1;
+      }
+    }
+    
+    .add-button {
+      margin-top: 20px;
+      background-color: #FF6B35;
+      border-color: #FF6B35;
+      
+      &:hover {
+        background-color: #e55a2b;
+        border-color: #e55a2b;
+      }
+    }
+  }
+
+  .order-list-card {
+    margin-bottom: 20px;
+    
+    .empty-order {
+      padding: 40px 20px;
+      text-align: center;
+      color: #999;
+      
+      .empty-text {
+        font-size: 14px;
+      }
+    }
+    
+    .order-scroll {
+      max-height: 400px;
+    }
+  }
+
+  .status-card {
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      
+      .status-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        .status-label {
+          font-size: 14px;
+          color: #666;
+        }
+      }
+      
+      .timer-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        .timer-label {
+          font-size: 14px;
+          color: #666;
+        }
+        
+        .timer-value {
+          font-size: 18px;
+          font-weight: bold;
+          color: #FF6B35;
+        }
+      }
+    }
+    
+    .control-buttons {
+      margin-bottom: 20px;
+      
+      .at-button {
+        background-color: #FF6B35;
+        border-color: #FF6B35;
+        
+        &:hover {
+          background-color: #e55a2b;
+          border-color: #e55a2b;
+        }
+        
+        &[disabled] {
+          background-color: #ccc;
+          border-color: #ccc;
+        }
+      }
+      
+      .at-button--secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        
+        &:hover {
+          background-color: #5a6268;
+          border-color: #5a6268;
+        }
+      }
+    }
+    
+    .total-amount {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+      
+      .total-label {
+        font-size: 16px;
+        color: #333;
+      }
+      
+      .total-value {
+        font-size: 22px;
+        font-weight: bold;
+        color: #FF6B35;
+      }
+    }
+  }
+}
+
+// taro-ui 组件样式覆盖
+.at-card {
+  margin-bottom: 0;
+  
+  .at-card__header {
+    background-color: #FF6B35;
+    color: white;
+    font-weight: bold;
+  }
+}
+
+.at-list__item {
+  &:active {
+    background-color: #f8f9fa;
+  }
+}

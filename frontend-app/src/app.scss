@@ -1,0 +1,94 @@
+// 全局样式
+page {
+  background-color: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+}
+
+// 主题色变量
+:root {
+  --primary-color: #FF6B35;
+  --primary-color-hover: #e55a2b;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --info-color: #17a2b8;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+}
+
+// 通用工具类
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mt-10 {
+  margin-top: 10px;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.p-10 {
+  padding: 10px;
+}
+
+.text-primary {
+  color: var(--primary-color);
+}
+
+.text-secondary {
+  color: var(--secondary-color);
+}
+
+.bg-primary {
+  background-color: var(--primary-color);
+}
+
+// 自定义taro-ui主题色
+.at-button--primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  
+  &:hover {
+    background-color: var(--primary-color-hover) !important;
+    border-color: var(--primary-color-hover) !important;
+  }
+}
+
+.at-tag--primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.at-input__title {
+  color: #333 !important;
+}
+
+.at-card__header {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+// 修复小程序tabbar样式
+.taro-tabbar__panel {
+  background-color: #fff;
+  border-top: 1px solid #e5e5e5;
+}
+
+.taro-tabbar__item {
+  color: #999;
+  
+  &.taro-tabbar__item--active {
+    color: var(--primary-color);
+  }
+}
