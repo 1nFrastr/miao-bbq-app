@@ -213,6 +213,32 @@
       }
     }
 
+    .load-more-btn {
+      padding: 30rpx;
+      text-align: center;
+      margin: 20rpx 0;
+      background: #f8f8f8;
+      border-radius: 16rpx;
+      border: 2rpx solid #e5e5e5;
+
+      &:active {
+        opacity: 0.7;
+        background: #eeeeee;
+      }
+
+      .load-more-text {
+        color: #666;
+        font-size: 28rpx;
+      }
+    }
+
+    .no-more-text {
+      padding: 30rpx;
+      text-align: center;
+      color: #999;
+      font-size: 24rpx;
+    }
+
     .empty-posts {
       padding: 120px 40px;
       text-align: center;

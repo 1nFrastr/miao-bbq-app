@@ -14,6 +14,8 @@ const My = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userInfo, setUserInfo] = useState<any>(null)
+  const [hasMore, setHasMore] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
 
   Taro.useLoad(() => {
     console.log('我的页面加载')
@@ -24,28 +26,27 @@ const My = () => {
     checkLoginAndLoadData()
   })
 
-  // 检查登录状态并加载数据
-  const checkLoginAndLoadData = useCallback(async () => {
-    const loggedIn = AuthService.isLoggedIn()
-    setIsLoggedIn(loggedIn)
-    
-    if (loggedIn) {
-      const user = AuthService.getCurrentUser()
-      setUserInfo(user)
-      await loadMyPosts()
-    }
-  }, [])
-
   // 加载我的推荐
-  const loadMyPosts = useCallback(async () => {
+  const loadMyPosts = useCallback(async (page: number = 1, isRefresh: boolean = true) => {
     try {
       setIsLoading(true)
       const response = await CommunityAPI.getMyPosts({
-        page_size: 20
+        page_size: 5,
+        page: page
       })
       
       if (response.results) {
-        setPosts(response.results)
+        if (isRefresh || page === 1) {
+          // 如果是刷新或第一页，直接设置新数据
+          setPosts(response.results)
+        } else {
+          // 如果是加载更多，追加到现有数据
+          setPosts(prev => [...prev, ...response.results])
+        }
+        
+        // 更新分页状态
+        setHasMore(!!response.next)
+        setCurrentPage(page)
       }
     } catch (error) {
       console.error('加载我的推荐失败:', error)
@@ -54,6 +55,29 @@ const My = () => {
       setIsLoading(false)
     }
   }, [])
+
+  // 检查登录状态并加载数据
+  const checkLoginAndLoadData = useCallback(async () => {
+    const loggedIn = AuthService.isLoggedIn()
+    setIsLoggedIn(loggedIn)
+    
+    if (loggedIn) {
+      const user = AuthService.getCurrentUser()
+      setUserInfo(user)
+      await loadMyPosts(1, true)
+    }
+  }, [loadMyPosts])
+
+  // 加载更多数据
+  const loadMorePosts = useCallback(async () => {
+    if (!hasMore || isLoading) return
+    
+    try {
+      await loadMyPosts(currentPage + 1, false)
+    } catch (error) {
+      console.error('加载更多失败:', error)
+    }
+  }, [hasMore, isLoading, currentPage, loadMyPosts])
 
   // 处理登录
   const handleLogin = useCallback(() => {
@@ -146,13 +170,13 @@ const My = () => {
           <Text className="section-title">我的推荐</Text>
         </View>
 
-        {isLoading ? (
+        {isLoading && posts.length === 0 ? (
           <View className="loading">
             <Text>加载中...</Text>
           </View>
         ) : posts.length > 0 ? (
           <View className="post-list">
-            {posts.slice(0, 3).map((post) => (
+            {posts.map((post) => (
               <View key={post.id} className="post-wrapper">
                 <PostCard post={post} />
                 <View className="approval-status-overlay">
@@ -166,6 +190,21 @@ const My = () => {
                 </View>
               </View>
             ))}
+            {hasMore && (
+              <View 
+                className="load-more-btn"
+                onClick={loadMorePosts}
+              >
+                <Text className="load-more-text">
+                  {isLoading ? '加载中...' : '加载更多'}
+                </Text>
+              </View>
+            )}
+            {!hasMore && posts.length > 0 && (
+              <View className="no-more-text">
+                <Text>已加载全部内容</Text>
+              </View>
+            )}
           </View>
         ) : (
           <View className="empty-posts">
