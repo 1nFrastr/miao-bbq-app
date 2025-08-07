@@ -10,7 +10,7 @@ export const CONFIG = {
 
   // 腾讯地图配置
   TENCENT_MAP: {
-    KEY: 'YOUR_TENCENT_MAP_KEY', // 需要替换为实际的腾讯地图API密钥
+    KEY: 'UKWBZ-MM2CW-YLZRC-OYZNJ-M24W3-XZBBZ', // 需要替换为实际的腾讯地图API密钥
     BASE_URL: 'https://apis.map.qq.com/ws'
   },
 
