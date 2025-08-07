@@ -150,7 +150,19 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def my_posts(self, request):
         """获取我的分享"""
-        queryset = Post.objects.filter(user=request.user).order_by('-created_at')
+        openid = request.META.get('HTTP_X_OPENID')
+        
+        if openid:
+            try:
+                from users.models import User
+                user = User.objects.get(openid=openid)
+            except User.DoesNotExist:
+                user = User.objects.first()  # 测试用默认用户
+        else:
+            user = User.objects.first()  # 测试用默认用户
+        
+        # 获取用户的所有帖子，不过滤状态
+        queryset = Post.objects.filter(user=user).order_by('-created_at')
         
         page = self.paginate_queryset(queryset)
         if page is not None:

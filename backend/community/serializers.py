@@ -132,7 +132,7 @@ class PostListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'shop_name', 'shop_price',
             'comment', 'latitude', 'longitude', 'location_address',
-            'likes_count', 'view_count', 'created_at',
+            'status', 'likes_count', 'view_count', 'created_at',
             'images', 'is_liked', 'distance'
         ]
     

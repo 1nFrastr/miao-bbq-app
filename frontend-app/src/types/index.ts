@@ -66,7 +66,7 @@ export interface Post {
   likes_count: number
   view_count: number
   is_liked: boolean
-  is_approved: boolean
+  status: 'pending' | 'approved' | 'rejected'
   created_at: string
   updated_at: string
   distance?: number

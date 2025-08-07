@@ -4,7 +4,8 @@ export default {
     'pages/community/index',
     'pages/my/index',
     'pages/login/index',
-    'pages/order-detail/index'
+    'pages/order-detail/index',
+    'pages/order-list/index'
   ],
   window: {
     backgroundTextStyle: 'light',

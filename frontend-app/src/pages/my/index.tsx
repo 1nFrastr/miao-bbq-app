@@ -2,14 +2,15 @@ import { View, Text, Image } from '@tarojs/components'
 import { AtIcon, AtList, AtListItem } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import { useState, useCallback } from 'react'
-import { Order } from '../../types'
-import { OrderAPI } from '../../utils/api'
+import { Post } from '../../types'
+import { CommunityAPI } from '../../utils/api'
 import { AuthService } from '../../utils/auth'
 import { MessageUtils } from '../../utils'
+import PostCard from '../../components/PostCard'
 import './index.scss'
 
 const My = () => {
-  const [orders, setOrders] = useState<Order[]>([])
+  const [posts, setPosts] = useState<Post[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userInfo, setUserInfo] = useState<any>(null)
@@ -31,24 +32,23 @@ const My = () => {
     if (loggedIn) {
       const user = AuthService.getCurrentUser()
       setUserInfo(user)
-      await loadOrderHistory()
+      await loadMyPosts()
     }
   }, [])
 
-  // 加载订单历史
-  const loadOrderHistory = useCallback(async () => {
+  // 加载我的推荐
+  const loadMyPosts = useCallback(async () => {
     try {
       setIsLoading(true)
-      const response = await OrderAPI.getOrders({
-        ordering: '-created_at',
+      const response = await CommunityAPI.getMyPosts({
         page_size: 20
       })
       
       if (response.results) {
-        setOrders(response.results)
+        setPosts(response.results)
       }
     } catch (error) {
-      console.error('加载订单历史失败:', error)
+      console.error('加载我的推荐失败:', error)
       MessageUtils.showError('加载失败，请重试')
     } finally {
       setIsLoading(false)
@@ -62,33 +62,31 @@ const My = () => {
     })
   }, [])
 
-  // 查看订单详情
-  const handleOrderDetail = useCallback((orderId: number) => {
+  // 进入订单列表页面
+  const handleOrderList = useCallback(() => {
     Taro.navigateTo({
-      url: `/pages/order-detail/index?orderId=${orderId}`
+      url: '/pages/order-list/index'
     })
   }, [])
 
-  // 格式化订单状态
-  const getOrderStatusText = (status: string) => {
+  // 获取审核状态文本
+  const getApprovalStatusText = (status: string) => {
     const statusMap = {
-      'pending': '待处理',
-      'preparing': '准备中',
-      'ready': '已完成',
-      'completed': '已完成'
+      'pending': '待审核',
+      'approved': '已审核',
+      'rejected': '已拒绝'
     }
-    return statusMap[status] || status
+    return statusMap[status as keyof typeof statusMap] || status
   }
 
-  // 获取状态颜色
-  const getStatusColor = (status: string) => {
+  // 获取审核状态颜色
+  const getApprovalStatusColor = (status: string) => {
     const colorMap = {
       'pending': '#ff9500',
-      'preparing': '#007aff',
-      'ready': '#34c759',
-      'completed': '#34c759'
+      'approved': '#34c759',
+      'rejected': '#ff3b30'
     }
-    return colorMap[status] || '#666'
+    return colorMap[status as keyof typeof colorMap] || '#666'
   }
 
   if (!isLoggedIn) {
@@ -128,12 +126,6 @@ const My = () => {
             <Text className="user-id">ID: {userInfo?.id}</Text>
           </View>
         </View>
-        {/* <View className="user-stats">
-          <View className="stat-item">
-            <Text className="stat-number">{orders.length}</Text>
-            <Text className="stat-label">订单数</Text>
-          </View>
-        </View> */}
       </View>
 
       {/* 功能菜单 */}
@@ -141,64 +133,44 @@ const My = () => {
         <AtList>
           <AtListItem
             title="我的订单"
-            extraText={`${orders.length}个`}
             arrow="right"
             iconInfo={{ value: 'list', color: '#FF6B35', size: 18 }}
-          />
-          <AtListItem
-            title="我的推荐"
-            arrow="right"
-            iconInfo={{ value: 'heart', color: '#FF6B35', size: 18 }}
-            onClick={() => Taro.navigateTo({ url: '/pages/community/index' })}
+            onClick={handleOrderList}
           />
         </AtList>
       </View>
 
-      {/* 订单历史 */}
-      <View className="order-history">
+      {/* 我的推荐 */}
+      <View className="my-posts">
         <View className="section-header">
-          <Text className="section-title">最近订单</Text>
-          <Text className="section-more">查看全部</Text>
+          <Text className="section-title">我的推荐</Text>
         </View>
 
         {isLoading ? (
           <View className="loading">
             <Text>加载中...</Text>
           </View>
-        ) : orders.length > 0 ? (
-          <View className="order-list">
-            {orders.slice(0, 5).map((order) => (
-              <View 
-                key={order.id} 
-                className="order-item"
-                onClick={() => handleOrderDetail(order.id)}
-              >
-                <View className="order-header">
-                  <Text className="order-id">订单 #{order.id}</Text>
+        ) : posts.length > 0 ? (
+          <View className="post-list">
+            {posts.slice(0, 3).map((post) => (
+              <View key={post.id} className="post-wrapper">
+                <PostCard post={post} />
+                <View className="approval-status-overlay">
                   <Text 
-                    className="order-status"
-                    style={{ color: getStatusColor(order.status) }}
+                    className="approval-status"
+                    style={{ color: getApprovalStatusColor(post.status) }}
                   >
-                    {getOrderStatusText(order.status)}
+                    {getApprovalStatusText(post.status)}
                   </Text>
                 </View>
-                <View className="order-content">
-                  <Text className="order-items">
-                    {order.items?.length || 0} 个菜品
-                  </Text>
-                  <Text className="order-amount">¥{order.total_amount}</Text>
-                </View>
-                <Text className="order-time">
-                  {new Date(order.created_at).toLocaleString()}
-                </Text>
               </View>
             ))}
           </View>
         ) : (
-          <View className="empty-orders">
-            <AtIcon value="shopping-cart" size="32" color="#ccc" />
-            <Text className="empty-text">暂无订单记录</Text>
-            <Text className="empty-tip">快去点单吧~</Text>
+          <View className="empty-posts">
+            <AtIcon value="heart" size="32" color="#ccc" />
+            <Text className="empty-text">暂无推荐记录</Text>
+            <Text className="empty-tip">快去分享你的美食体验吧~</Text>
           </View>
         )}
       </View>

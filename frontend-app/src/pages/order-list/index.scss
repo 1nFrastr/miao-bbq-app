@@ -1,0 +1,129 @@
+.order-list-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+
+  .page-header {
+    background: #fff;
+    padding: 32rpx;
+    border-bottom: 1rpx solid #eee;
+
+    .page-title {
+      font-size: 36rpx;
+      font-weight: 600;
+      color: #333;
+    }
+  }
+
+  .loading {
+    padding: 120rpx 0;
+    text-align: center;
+    color: #999;
+  }
+
+  .orders-container {
+    padding: 24rpx;
+  }
+
+  .order-item {
+    background: #fff;
+    border-radius: 16rpx;
+    padding: 32rpx;
+    margin-bottom: 24rpx;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16rpx;
+
+      .order-id {
+        font-size: 32rpx;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .order-status {
+        font-size: 28rpx;
+        font-weight: 500;
+        padding: 8rpx 16rpx;
+        border-radius: 8rpx;
+        background: rgba(0, 122, 255, 0.1);
+      }
+    }
+
+    .order-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16rpx;
+
+      .order-items {
+        font-size: 28rpx;
+        color: #666;
+      }
+
+      .order-amount {
+        font-size: 32rpx;
+        font-weight: 600;
+        color: #FF6B35;
+      }
+    }
+
+    .order-time {
+      font-size: 24rpx;
+      color: #999;
+    }
+  }
+
+  .load-more {
+    padding: 32rpx;
+    text-align: center;
+    background: #fff;
+    border-radius: 16rpx;
+    margin-bottom: 24rpx;
+
+    .load-more-text {
+      color: #007aff;
+      font-size: 28rpx;
+    }
+  }
+
+  .no-more {
+    padding: 32rpx;
+    text-align: center;
+
+    .no-more-text {
+      color: #999;
+      font-size: 24rpx;
+    }
+  }
+
+  .empty-orders {
+    padding: 120rpx 48rpx;
+    text-align: center;
+
+    .empty-text {
+      display: block;
+      margin: 32rpx 0 16rpx;
+      font-size: 32rpx;
+      color: #666;
+    }
+
+    .empty-tip {
+      display: block;
+      margin-bottom: 48rpx;
+      font-size: 28rpx;
+      color: #999;
+    }
+
+    .go-order-btn {
+      display: inline-block;
+      padding: 24rpx 48rpx;
+      background: #FF6B35;
+      color: #fff;
+      border-radius: 48rpx;
+      font-size: 28rpx;
+    }
+  }
+}
