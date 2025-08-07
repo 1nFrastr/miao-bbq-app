@@ -1,7 +1,7 @@
 import { View, Image } from '@tarojs/components'
 import { AtIcon } from 'taro-ui'
 import Taro from '@tarojs/taro'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useRef, useEffect } from 'react'
 import { ImageUploaderProps, ImageItem } from './types'
 import { UploadAPI } from '../../utils/api'
 import { MessageUtils } from '../../utils'
@@ -14,6 +14,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   disabled = false
 }) => {
   const [uploadingImages, setUploadingImages] = useState<ImageItem[]>([])
+  const currentUrlsRef = useRef<string[]>(value)
+
+  // 同步外部 value 到 ref
+  useEffect(() => {
+    currentUrlsRef.current = value
+  }, [value])
 
   // 选择图片
   const handleChooseImage = useCallback(async () => {
@@ -32,7 +38,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         sourceType: ['album', 'camera']
       })
 
-      // 开始上传选中的图片
+      // 串行上传选中的图片，一张张上传
       for (const tempFilePath of res.tempFilePaths) {
         await uploadImage(tempFilePath)
       }
@@ -62,7 +68,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       // 上传成功，移除uploading状态，添加到value中
       setUploadingImages(prev => prev.filter(img => img.id !== imageId))
       
-      const newUrls = [...value, result.image_url]
+      // 使用 ref 获取最新的 URL 列表，避免竞态条件
+      const newUrls = [...currentUrlsRef.current, result.image_url]
+      currentUrlsRef.current = newUrls
       onChange?.(newUrls)
       
       MessageUtils.showSuccess('上传成功')
@@ -77,7 +85,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       )
       MessageUtils.showError('上传失败，请重试')
     }
-  }, [value, onChange])
+  }, [onChange])
 
   // 删除图片
   const handleDeleteImage = useCallback((index: number) => {
