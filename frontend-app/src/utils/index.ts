@@ -247,3 +247,50 @@ export class MessageUtils {
     }
   }
 }
+
+// 位置精度处理工具
+export class LocationUtils {
+  /**
+   * 处理纬度精度，确保符合数据库字段限制
+   * 数据库限制：max_digits=10, decimal_places=8
+   * 即：最多2位整数 + 8位小数
+   */
+  static formatLatitude(latitude: number): number {
+    // 纬度范围 -90 到 90，最多2位整数
+    const rounded = parseFloat(latitude.toFixed(8))
+    
+    // 确保不超过总位数限制
+    const str = Math.abs(rounded).toString()
+    const [integerPart = '', decimalPart = ''] = str.split('.')
+    
+    if (integerPart.length + (decimalPart.length > 0 ? decimalPart.length : 0) > 10) {
+      // 如果总位数超过10位，减少小数位数
+      const maxDecimalPlaces = Math.max(0, 10 - integerPart.length)
+      return parseFloat(latitude.toFixed(maxDecimalPlaces))
+    }
+    
+    return rounded
+  }
+  
+  /**
+   * 处理经度精度，确保符合数据库字段限制
+   * 数据库限制：max_digits=11, decimal_places=8
+   * 即：最多3位整数 + 8位小数
+   */
+  static formatLongitude(longitude: number): number {
+    // 经度范围 -180 到 180，最多3位整数
+    const rounded = parseFloat(longitude.toFixed(8))
+    
+    // 确保不超过总位数限制
+    const str = Math.abs(rounded).toString()
+    const [integerPart = '', decimalPart = ''] = str.split('.')
+    
+    if (integerPart.length + (decimalPart.length > 0 ? decimalPart.length : 0) > 11) {
+      // 如果总位数超过11位，减少小数位数
+      const maxDecimalPlaces = Math.max(0, 11 - integerPart.length)
+      return parseFloat(longitude.toFixed(maxDecimalPlaces))
+    }
+    
+    return rounded
+  }
+}

@@ -5,7 +5,7 @@ import { useState, useCallback } from 'react'
 import { Post, PostFormData, LocationData, SortType } from '../../types'
 import { CommunityAPI } from '../../utils/api'
 import { AuthService } from '../../utils/auth'
-import { ValidationUtils, MessageUtils } from '../../utils'
+import { ValidationUtils, MessageUtils, LocationUtils } from '../../utils'
 import LocationPicker from '../../components/LocationPicker'
 import ImageUploader from '../../components/ImageUploader'
 import PostCard from '../../components/PostCard'
@@ -69,8 +69,8 @@ const Community = () => {
         case 'distance':
           // 如果有位置信息，按距离排序
           if (locationData?.latitude && locationData?.longitude) {
-            params.lat = locationData.latitude
-            params.lng = locationData.longitude
+            params.lat = LocationUtils.formatLatitude(locationData.latitude)
+            params.lng = LocationUtils.formatLongitude(locationData.longitude)
             params.ordering = 'distance'
           } else {
             ordering = '-created_at'
@@ -219,10 +219,10 @@ const Community = () => {
         shop_name: formData.shop_name.trim(),
         shop_price: parseFloat(formData.shop_price),
         comment: formData.comment.trim(),
-        // 添加位置信息
+        // 添加位置信息，限制经纬度精度避免后端报错
         ...(locationData?.isLocationEnabled && {
-          latitude: locationData.latitude,
-          longitude: locationData.longitude,
+          latitude: LocationUtils.formatLatitude(locationData.latitude), // 安全处理纬度精度
+          longitude: LocationUtils.formatLongitude(locationData.longitude), // 安全处理经度精度
           location_address: locationData.address
         }),
         // 添加图片信息
