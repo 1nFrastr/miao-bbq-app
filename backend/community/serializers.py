@@ -94,6 +94,8 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         images_data = validated_data.pop('images', [])
+        # 手动设置新发布的帖子为已审核通过状态
+        validated_data['status'] = 'approved'
         post = Post.objects.create(**validated_data)
         
         # 创建图片记录
