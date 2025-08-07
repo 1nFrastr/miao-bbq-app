@@ -151,17 +151,63 @@
 
         .approval-status-overlay {
           position: absolute;
-          top: 16rpx;
-          right: 16rpx;
+          bottom: 30rpx;
+          right: 30rpx;
           z-index: 10;
+          pointer-events: none;
 
           .approval-status {
-            font-size: 24rpx;
-            padding: 8rpx 16rpx;
-            border-radius: 20rpx;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10rpx);
-            border: 1rpx solid rgba(0, 0, 0, 0.1);
+            font-size: 32rpx;
+            font-weight: bold;
+            padding: 20rpx;
+            width: 120rpx;
+            height: 120rpx;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.2;
+            border: 6rpx solid;
+            transform: rotate(-15deg);
+            opacity: 0.85;
+            position: relative;
+            
+            // 根据状态设置不同的样式
+            &[data-status="pending"] {
+              background: rgba(255, 149, 0, 0.2);
+              border-color: #ff9500;
+              color: #ff9500;
+              box-shadow: 0 0 20rpx rgba(255, 149, 0, 0.3);
+            }
+            
+            &[data-status="approved"] {
+              background: rgba(52, 199, 89, 0.2);
+              border-color: #34c759;
+              color: #34c759;
+              box-shadow: 0 0 20rpx rgba(52, 199, 89, 0.3);
+            }
+            
+            &[data-status="rejected"] {
+              background: rgba(255, 59, 48, 0.2);
+              border-color: #ff3b30;
+              color: #ff3b30;
+              box-shadow: 0 0 20rpx rgba(255, 59, 48, 0.3);
+            }
+            
+            // 添加内圈边框效果
+            &::before {
+              content: '';
+              position: absolute;
+              top: 8rpx;
+              left: 8rpx;
+              right: 8rpx;
+              bottom: 8rpx;
+              border: 2rpx solid;
+              border-radius: 50%;
+              border-color: inherit;
+              opacity: 0.6;
+            }
           }
         }
       }

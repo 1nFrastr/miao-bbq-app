@@ -158,6 +158,7 @@ const My = () => {
                 <View className="approval-status-overlay">
                   <Text 
                     className="approval-status"
+                    data-status={post.status}
                     style={{ color: getApprovalStatusColor(post.status) }}
                   >
                     {getApprovalStatusText(post.status)}
