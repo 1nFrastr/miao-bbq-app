@@ -151,6 +151,10 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+# 生产环境静态文件收集目录
+if ENVIRONMENT == 'production':
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
