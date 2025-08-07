@@ -85,20 +85,15 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# 数据库配置 - 支持SQLite和MySQL
-db_engine = os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
+# 根据环境自动选择数据库配置
+# 本地开发默认使用SQLite，生产环境使用MySQL
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')  # development, production
 
-if db_engine == 'django.db.backends.sqlite3':
+if ENVIRONMENT == 'production':
+    # 生产环境使用MySQL
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / os.getenv('DB_NAME', 'db.sqlite3'),
-        }
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": os.getenv('DB_ENGINE', 'django.db.backends.mysql'),
+            "ENGINE": "django.db.backends.mysql",
             "NAME": os.getenv('DB_NAME', 'miao_bbq_db'),
             "USER": os.getenv('DB_USER', 'root'),
             "PASSWORD": os.getenv('DB_PASSWORD', ''),
@@ -106,7 +101,16 @@ else:
             "PORT": os.getenv('DB_PORT', '3306'),
             "OPTIONS": {
                 'charset': 'utf8mb4',
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             },
+        }
+    }
+else:
+    # 开发环境使用SQLite
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 

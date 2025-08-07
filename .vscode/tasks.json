@@ -49,7 +49,7 @@
         {
             "label": "切换到SQLite数据库",
             "type": "shell",
-            "command": "cd ./backend && cp .env.example .env && echo \"已切换到SQLite数据库配置\"",
+            "command": "cd ./backend && cp .env.development .env && echo \"已切换到SQLite数据库配置（开发环境）\"",
             "group": "build",
             "problemMatcher": []
         },
