@@ -93,6 +93,38 @@ const My = () => {
     })
   }, [])
 
+  // 处理退出登录
+  const handleLogout = useCallback(async () => {
+    try {
+      const confirmed = await MessageUtils.showConfirm(
+        '退出登录',
+        '确定要退出当前账号吗？'
+      )
+      
+      if (confirmed) {
+        // 执行退出登录操作
+        AuthService.logout()
+        
+        // 清除页面状态
+        setIsLoggedIn(false)
+        setUserInfo(null)
+        setPosts([])
+        setCurrentPage(1)
+        setHasMore(true)
+        
+        MessageUtils.showSuccess('已退出登录')
+        
+        // 延迟一点显示登录界面，让用户看到成功提示
+        setTimeout(() => {
+          checkLoginAndLoadData()
+        }, 1000)
+      }
+    } catch (error) {
+      console.error('退出登录失败:', error)
+      MessageUtils.showError('退出登录失败')
+    }
+  }, [checkLoginAndLoadData])
+
   // 获取审核状态文本
   const getApprovalStatusText = (status: string) => {
     const statusMap = {
@@ -160,6 +192,12 @@ const My = () => {
             arrow="right"
             iconInfo={{ value: 'list', color: '#FF6B35', size: 18 }}
             onClick={handleOrderList}
+          />
+          <AtListItem
+            title="退出登录"
+            arrow="right"
+            iconInfo={{ value: 'close', color: '#ff3b30', size: 18 }}
+            onClick={handleLogout}
           />
         </AtList>
       </View>
