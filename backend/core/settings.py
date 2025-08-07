@@ -189,3 +189,15 @@ CORS_ALLOW_CREDENTIALS = True
 # 注意：在生产环境中，这些配置应该通过环境变量设置
 WECHAT_APP_ID = os.getenv('WECHAT_APP_ID', 'your_wechat_app_id')  # 替换为实际的小程序AppID
 WECHAT_APP_SECRET = os.getenv('WECHAT_APP_SECRET', 'your_wechat_app_secret')  # 替换为实际的小程序AppSecret
+
+# 媒体文件配置
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# 文件上传配置
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024  # 2MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
+
+# 允许的图片格式
+ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp']
+MAX_IMAGE_SIZE = 2 * 1024 * 1024  # 2MB

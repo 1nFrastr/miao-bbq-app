@@ -299,3 +299,38 @@ export class CommunityAPI {
     })
   }
 }
+
+// 文件上传相关API
+export class UploadAPI {
+  // 上传单张图片
+  static async uploadImage(filePath: string): Promise<{ image_url: string; image_id: string; file_size: number; file_name: string }> {
+    return new Promise((resolve, reject) => {
+      // 获取用户openid用于认证
+      const openid = Taro.getStorageSync('user_openid')
+      
+      Taro.uploadFile({
+        url: `${API_BASE_URL}/uploads/images/`,
+        filePath,
+        name: 'image',
+        header: {
+          'X-Openid': openid || ''
+        },
+        success: (res) => {
+          try {
+            const data = JSON.parse(res.data)
+            if (res.statusCode === 200) {
+              resolve(data)
+            } else {
+              reject(new Error(data.error || '上传失败'))
+            }
+          } catch (error) {
+            reject(new Error('响应解析失败'))
+          }
+        },
+        fail: (error) => {
+          reject(new Error(error.errMsg || '上传失败'))
+        }
+      })
+    })
+  }
+}

@@ -7,6 +7,7 @@ import { CommunityAPI } from '../../utils/api'
 import { AuthService } from '../../utils/auth'
 import { ValidationUtils, MessageUtils } from '../../utils'
 import LocationPicker from '../../components/LocationPicker'
+import ImageUploader from '../../components/ImageUploader'
 import './index.scss'
 
 const Community = () => {
@@ -20,6 +21,9 @@ const Community = () => {
   
   // 位置状态
   const [locationData, setLocationData] = useState<LocationData | undefined>()
+  
+  // 图片状态
+  const [selectedImages, setSelectedImages] = useState<string[]>([])
   
   // 社区状态
   const [posts, setPosts] = useState<Post[]>([])
@@ -120,6 +124,11 @@ const Community = () => {
     try {
       setIsLoading(true)
       
+      // 构建图片数组（如果有图片的话）
+      const images = selectedImages.length > 0 
+        ? selectedImages.map(url => ({ image_url: url }))
+        : []
+      
       const postData = {
         shop_name: formData.shop_name.trim(),
         shop_location: formData.shop_location.trim(),
@@ -130,7 +139,9 @@ const Community = () => {
           latitude: locationData.latitude,
           longitude: locationData.longitude,
           location_address: locationData.address
-        })
+        }),
+        // 添加图片信息
+        ...(images.length > 0 && { images })
       }
 
       await CommunityAPI.createPost(postData)
@@ -144,6 +155,7 @@ const Community = () => {
         comment: ''
       })
       setLocationData(undefined)
+      setSelectedImages([])
       await loadPosts()
       
     } catch (error) {
@@ -151,7 +163,7 @@ const Community = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [formData, locationData, isLoggedIn, validateForm, handleLogin, loadPosts])
+  }, [formData, locationData, selectedImages, isLoggedIn, validateForm, handleLogin, loadPosts])
 
   return (
     <View className="community-page">
@@ -206,6 +218,17 @@ const Community = () => {
               maxlength={500}
               value={formData.comment}
               onInput={(e) => handleInputChange('comment', e.detail.value)}
+            />
+          </View>
+
+          {/* 图片上传组件 */}
+          <View className="form-item">
+            <Text className="form-label">店铺图片 (最多3张)</Text>
+            <ImageUploader
+              value={selectedImages}
+              onChange={setSelectedImages}
+              maxCount={3}
+              disabled={isLoading}
             />
           </View>
 
