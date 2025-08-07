@@ -10,8 +10,10 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = ({ post, showDistance = false }) => {
+  const isBlurred = post.status !== 'approved'
+  
   return (
-    <View className="post-card">
+    <View className={`post-card ${isBlurred ? 'post-card--blurred' : ''}`}>
       <View className="post-header">
         <View className="shop-info">
           <Text className="shop-name">{post.shop_name}</Text>
@@ -66,6 +68,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, showDistance = false }) => {
         </View>
         <Text className="post-time">{new Date(post.created_at).toLocaleDateString()}</Text>
       </View>
+      
+      {/* 模糊遮罩层 */}
+      {isBlurred && (
+        <View className="blur-overlay">
+        </View>
+      )}
     </View>
   )
 }

@@ -6,6 +6,19 @@
   margin-bottom: 16rpx;
   border: 1rpx solid #f0f0f0;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+
+  // 模糊状态
+  &.post-card--blurred {
+    .post-header,
+    .post-images,
+    .post-comment,
+    .post-footer {
+      filter: blur(4rpx);
+      opacity: 0.6;
+    }
+  }
 
   .post-header {
     display: flex;
@@ -126,6 +139,40 @@
     .post-time {
       font-size: 22rpx;
       color: #999;
+    }
+  }
+
+  // 模糊遮罩层
+  .blur-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4rpx);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+
+    .blur-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40rpx;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 16rpx;
+      color: #fff;
+
+      .blur-text {
+        font-size: 28rpx;
+        font-weight: 500;
+        margin-top: 16rpx;
+        text-align: center;
+        color: #fff;
+      }
     }
   }
 }
