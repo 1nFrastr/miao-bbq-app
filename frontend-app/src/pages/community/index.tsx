@@ -288,7 +288,7 @@ const Community = () => {
             className="publish-btn"
             onClick={handlePublish}
           >
-            <AtIcon value="send" size="16" color="#fff" />
+            <AtIcon value="add-circle" size="20" color="#fff" />
             <Text className="btn-text">发布推荐</Text>
           </View>
         </View>
