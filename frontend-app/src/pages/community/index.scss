@@ -76,6 +76,11 @@
           border-color: #ff6b35;
           background: #fff;
         }
+
+        // 紧凑版推荐理由输入框
+        &--compact {
+          min-height: 100rpx;
+        }
       }
     }
 
@@ -125,16 +130,18 @@
       width: 100%;
       height: 80rpx;
       background: linear-gradient(135deg, #ff6b35, #f7931e);
-      border-radius: 40rpx;
+      border-radius: 16rpx; // 优化按钮形状，减少圆角
       display: flex;
       align-items: center;
       justify-content: center;
       border: none;
       margin-top: 32rpx;
-      box-shadow: none;
+      box-shadow: 0 4rpx 12rpx rgba(255, 107, 53, 0.3);
+      transition: all 0.3s ease;
 
-      &::after {
-        border: none;
+      &:active {
+        transform: translateY(2rpx);
+        box-shadow: 0 2rpx 8rpx rgba(255, 107, 53, 0.2);
       }
 
       .btn-icon {
@@ -154,11 +161,11 @@
     background: #fff;
     margin: 0 24rpx;
     border-radius: 16rpx;
-    padding: 24rpx;
+    overflow: hidden;
     box-shadow: none;
 
     .section-header {
-      margin-bottom: 24rpx;
+      padding: 24rpx 24rpx 0;
 
       .section-title {
         font-size: 30rpx;
@@ -166,24 +173,178 @@
         color: #333;
         margin-bottom: 20rpx;
       }
+    }
 
-      .filter-tabs {
-        display: flex;
-        gap: 12rpx;
+    // AtTabs 样式覆盖
+    :global(.at-tabs) {
+      border-bottom: none;
+      
+      .at-tabs__header {
+        border-bottom: 1rpx solid #eee;
+      }
 
-        .tab-item {
-          padding: 12rpx 24rpx;
-          font-size: 24rpx;
-          color: #666;
-          background: #f5f5f5;
-          border-radius: 20rpx;
-          transition: all 0.3s ease;
+      .at-tabs__item {
+        color: #666;
+        font-size: 26rpx;
+        
+        &--active {
+          color: #ff6b35;
+          font-weight: 500;
+        }
+      }
 
-          &--active {
-            background: linear-gradient(135deg, #ff6b35, #f7931e);
-            color: #fff;
-            font-weight: 500;
+      .at-tabs__underline {
+        background-color: #ff6b35;
+        height: 4rpx;
+        border-radius: 2rpx;
+      }
+    }
+
+    .posts-list {
+      padding: 0 24rpx 24rpx;
+
+      .post-card {
+        background: #fff;
+        border-radius: 12rpx;
+        padding: 24rpx;
+        margin-bottom: 16rpx;
+        border: 1rpx solid #f0f0f0;
+        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+
+        .post-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 16rpx;
+
+          .shop-info {
+            flex: 1;
+
+            .shop-name {
+              font-size: 28rpx;
+              font-weight: 600;
+              color: #333;
+              margin-bottom: 8rpx;
+              display: block;
+            }
+
+            .shop-location {
+              font-size: 24rpx;
+              color: #666;
+              display: flex;
+              align-items: center;
+              
+              .distance {
+                margin-left: 12rpx;
+                color: #ff6b35;
+                font-size: 22rpx;
+              }
+            }
           }
+
+          .shop-price {
+            display: flex;
+            align-items: baseline;
+            flex-shrink: 0;
+
+            .price-text {
+              font-size: 32rpx;
+              font-weight: 600;
+              color: #ff6b35;
+            }
+
+            .price-unit {
+              font-size: 22rpx;
+              color: #999;
+              margin-left: 4rpx;
+            }
+          }
+        }
+
+        .post-images {
+          display: flex;
+          gap: 8rpx;
+          margin-bottom: 16rpx;
+          flex-wrap: wrap;
+
+          .image-item {
+            width: 150rpx;
+            height: 150rpx;
+            border-radius: 8rpx;
+            overflow: hidden;
+
+            .post-image {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+          }
+
+          .more-images {
+            width: 150rpx;
+            height: 150rpx;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .more-text {
+              color: #fff;
+              font-size: 24rpx;
+              font-weight: 500;
+            }
+          }
+        }
+
+        .post-comment {
+          font-size: 26rpx;
+          color: #333;
+          line-height: 1.5;
+          margin-bottom: 16rpx;
+        }
+
+        .post-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 16rpx;
+          border-top: 1rpx solid #f0f0f0;
+
+          .post-stats {
+            display: flex;
+            gap: 16rpx;
+
+            .stat-item {
+              display: flex;
+              align-items: center;
+              gap: 4rpx;
+
+              .stat-text {
+                font-size: 22rpx;
+                color: #666;
+              }
+            }
+          }
+
+          .post-time {
+            font-size: 22rpx;
+            color: #999;
+          }
+        }
+      }
+
+      .empty-posts {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 80rpx 0;
+
+        .empty-text {
+          font-size: 26rpx;
+          color: #999;
+          margin-top: 16rpx;
         }
       }
     }
