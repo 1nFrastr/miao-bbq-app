@@ -4,6 +4,7 @@ import React from 'react'
 import { Post } from '../../types'
 import { TimeUtils } from '../../utils'
 import './index.scss'
+import Taro from '@tarojs/taro'
 
 interface PostCardProps {
   post: Post
@@ -12,14 +13,33 @@ interface PostCardProps {
 
 const PostCard: React.FC<PostCardProps> = ({ post, showDistance = false }) => {
   const isBlurred = post.status !== 'approved'
+  // 地址点击事件，打开系统导航
+  const handleLocationClick = (e: any) => {
+    e.stopPropagation && e.stopPropagation();
+    if (post.latitude && post.longitude) {
+      Taro.openLocation({
+        latitude: Number(post.latitude),
+        longitude: Number(post.longitude),
+        name: post.shop_name,
+        address: post.location_address,
+        scale: 16
+      })
+    } else {
+      Taro.showToast({ title: '未提供位置信息', icon: 'none' })
+    }
+  }
   
   return (
     <View className={`post-card ${isBlurred ? 'post-card--blurred' : ''}`}>
       <View className="post-header">
         <View className="shop-info">
           <Text className="shop-name">{post.shop_name}</Text>
-          <Text className="shop-location">
-            <AtIcon value="map-pin" size="12" color="#999" />
+          <Text
+            className="shop-location"
+            onClick={handleLocationClick}
+            style={{ cursor: 'pointer', color: '#007aff' }}
+          >
+            <AtIcon value="map-pin" size="12" color="#007aff" />
             {post.location_address}
             {showDistance && post.distance && (
               <Text className="distance">距离 {(post.distance / 1000).toFixed(1)}km</Text>
