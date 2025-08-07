@@ -2,7 +2,7 @@
   "miniprogramRoot": "./dist",
   "projectname": "frontend-app",
   "description": "BBQ",
-  "appid": "touristappid",
+  "appid": "wx5ba6f284178604e2",
   "setting": {
     "urlCheck": false,
     "es6": false,

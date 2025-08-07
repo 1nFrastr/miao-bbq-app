@@ -1,6 +1,11 @@
 import type { UserConfigExport } from "@tarojs/cli"
 
 export default {
+  defineConstants: {
+    // 从环境变量中读取 API 地址
+    API_BASE_URL: JSON.stringify(process.env.TARO_APP_API_URL || 'https://bbq-backend.sodair.top/api'),
+    DEBUG_MODE: JSON.stringify(process.env.TARO_APP_DEBUG === 'true')
+  },
   mini: {},
   h5: {
     /**

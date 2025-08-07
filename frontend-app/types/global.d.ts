@@ -11,6 +11,10 @@ declare module '*.scss';
 declare module '*.sass';
 declare module '*.styl';
 
+// 全局常量声明
+declare const API_BASE_URL: string;
+declare const DEBUG_MODE: boolean;
+
 declare namespace NodeJS {
   interface ProcessEnv {
     /** NODE 内置环境变量, 会影响到最终构建生成产物 */

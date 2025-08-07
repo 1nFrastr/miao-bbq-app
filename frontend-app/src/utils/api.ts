@@ -1,7 +1,8 @@
 import Taro from '@tarojs/taro'
+import { ENV_CONFIG } from '../config/env'
 
 // API配置
-const API_BASE_URL = 'https://bbq-backend.sodair.top/api'
+const API_BASE_URL = ENV_CONFIG.API_BASE_URL
 
 // 请求拦截器配置
 interface RequestConfig {
@@ -17,7 +18,10 @@ export const request = async <T = any>(config: RequestConfig): Promise<T> => {
     // 获取用户openid用于认证
     const openid = Taro.getStorageSync('user_openid')
     
-    console.log('API请求:', `${API_BASE_URL}${config.url}`, config.method, config.data)
+    // 只在调试模式下输出详细日志
+    if (ENV_CONFIG.DEBUG_MODE) {
+      console.log('API请求:', `${API_BASE_URL}${config.url}`, config.method, config.data)
+    }
     
     const response = await Taro.request({
       url: `${API_BASE_URL}${config.url}`,
@@ -30,7 +34,9 @@ export const request = async <T = any>(config: RequestConfig): Promise<T> => {
       }
     })
 
-    console.log('API响应:', response.statusCode, response.data)
+    if (ENV_CONFIG.DEBUG_MODE) {
+      console.log('API响应:', response.statusCode, response.data)
+    }
 
     // 处理响应
     if (response.statusCode === 200 || response.statusCode === 201) {
