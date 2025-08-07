@@ -15,7 +15,6 @@ const Community = () => {
   // 表单状态
   const [formData, setFormData] = useState<PostFormData>({
     shop_name: '',
-    shop_location: '',
     shop_price: '',
     comment: ''
   })
@@ -124,8 +123,8 @@ const Community = () => {
       return false
     }
     
-    if (!ValidationUtils.isNotEmpty(formData.shop_location)) {
-      MessageUtils.showError('请输入地址位置')
+    if (!locationData?.isLocationEnabled) {
+      MessageUtils.showError('请获取店铺位置')
       return false
     }
     
@@ -140,7 +139,7 @@ const Community = () => {
     }
     
     return true
-  }, [formData])
+  }, [formData, locationData])
 
   // 处理登录
   const handleLogin = useCallback(async () => {
@@ -196,7 +195,6 @@ const Community = () => {
       
       const postData = {
         shop_name: formData.shop_name.trim(),
-        shop_location: formData.shop_location.trim(),
         shop_price: parseFloat(formData.shop_price),
         comment: formData.comment.trim(),
         // 添加位置信息
@@ -215,7 +213,6 @@ const Community = () => {
       // 清空表单并重新加载列表
       setFormData({
         shop_name: '',
-        shop_location: '',
         shop_price: '',
         comment: ''
       })
@@ -244,16 +241,6 @@ const Community = () => {
               placeholder="例如：老王烧烤店"
               value={formData.shop_name}
               onInput={(e) => handleInputChange('shop_name', e.detail.value)}
-            />
-          </View>
-
-          <View className="form-item">
-            <Text className="form-label">地址位置</Text>
-            <Input 
-              className="form-input" 
-              placeholder="例如：XX路XX号"
-              value={formData.shop_location}
-              onInput={(e) => handleInputChange('shop_location', e.detail.value)}
             />
           </View>
 

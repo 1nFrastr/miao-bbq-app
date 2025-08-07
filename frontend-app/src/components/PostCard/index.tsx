@@ -17,7 +17,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, showDistance = false }) => {
           <Text className="shop-name">{post.shop_name}</Text>
           <Text className="shop-location">
             <AtIcon value="map-pin" size="12" color="#999" />
-            {post.location_address || post.shop_location}
+            {post.location_address}
             {showDistance && post.distance && (
               <Text className="distance">距离 {(post.distance / 1000).toFixed(1)}km</Text>
             )}

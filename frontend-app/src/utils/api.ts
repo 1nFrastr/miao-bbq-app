@@ -218,7 +218,6 @@ export class CommunityAPI {
   // 创建分享
   static async createPost(postData: {
     shop_name: string
-    shop_location: string
     shop_price: number
     comment: string
     latitude?: number

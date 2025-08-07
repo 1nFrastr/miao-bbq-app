@@ -13,7 +13,6 @@ class Post(models.Model):
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True, verbose_name='用户')
     shop_name = models.CharField(max_length=100, verbose_name='店铺名称')
-    shop_location = models.CharField(max_length=200, verbose_name='店铺地址')
     shop_price = models.IntegerField(verbose_name='人均消费')
     comment = models.TextField(verbose_name='推荐理由')
     latitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True, verbose_name='纬度')

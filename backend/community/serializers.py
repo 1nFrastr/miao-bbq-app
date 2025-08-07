@@ -32,7 +32,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'id', 'user', 'shop_name', 'shop_location', 'shop_price',
+            'id', 'user', 'shop_name', 'shop_price',
             'comment', 'latitude', 'longitude', 'location_address',
             'status', 'likes_count', 'view_count', 'created_at',
             'updated_at', 'images', 'is_liked', 'distance'
@@ -88,7 +88,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'shop_name', 'shop_location', 'shop_price', 'comment',
+            'shop_name', 'shop_price', 'comment',
             'latitude', 'longitude', 'location_address', 'images'
         ]
 
@@ -115,7 +115,7 @@ class PostUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'shop_name', 'shop_location', 'shop_price', 'comment',
+            'shop_name', 'shop_price', 'comment',
             'latitude', 'longitude', 'location_address'
         ]
 
@@ -130,7 +130,7 @@ class PostListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'id', 'user', 'shop_name', 'shop_location', 'shop_price',
+            'id', 'user', 'shop_name', 'shop_price',
             'comment', 'latitude', 'longitude', 'location_address',
             'likes_count', 'view_count', 'created_at',
             'images', 'is_liked', 'distance'

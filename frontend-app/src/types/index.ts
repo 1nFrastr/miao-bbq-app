@@ -57,7 +57,6 @@ export interface Post {
   id: number
   user: number
   shop_name: string
-  shop_location: string
   shop_price: number
   comment: string
   latitude?: number
@@ -120,10 +119,9 @@ export interface LocationData {
 // 扩展后的表单数据结构
 export interface PostFormData {
   shop_name: string
-  shop_location: string
   shop_price: string
   comment: string
-  // 新增位置字段
+  // 位置字段
   latitude?: number
   longitude?: number
   location_address?: string

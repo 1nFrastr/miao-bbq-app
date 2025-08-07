@@ -27,7 +27,6 @@ export const mockOrderData = {
 
 export const mockPostData = {
   shop_name: '老北京烧烤店',
-  shop_location: '朝阳区三里屯',
   shop_price: 80,
   comment: '味道不错，价格实惠，推荐羊肉串和鸡翅！',
   latitude: 39.9042,
