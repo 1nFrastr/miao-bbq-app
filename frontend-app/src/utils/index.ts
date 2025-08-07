@@ -120,13 +120,52 @@ export class TimeUtils {
 
     if (days > 0) return `${days}天前`
     if (hours > 0) return `${hours}小时前`
-    if (minutes > 0) return `${minutes}分钟前`
+    if (minutes > 5) return `${minutes}分钟前`
     return '刚刚'
   }
 
-  // 格式化日期
+  // 智能格式化日期
   static formatDate(timeString: string): string {
     const date = new Date(timeString)
+    const now = new Date()
+    
+    // 获取今天的开始时间（00:00:00）
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    // 获取昨天的开始时间
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+    // 获取今年的开始时间
+    const thisYear = new Date(now.getFullYear(), 0, 1)
+    
+    // 今天之内：显示相对时间
+    if (date >= today) {
+      const diff = now.getTime() - date.getTime()
+      const minutes = Math.floor(diff / 60000)
+      const hours = Math.floor(minutes / 60)
+      
+      if (hours > 0) return `${hours}小时前`
+      if (minutes > 5) return `${minutes}分钟前`
+      return '刚刚'
+    }
+    
+    // 昨天：显示"昨天 时:分"
+    if (date >= yesterday) {
+      return `昨天 ${date.toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })}`
+    }
+    
+    // 今年之内：显示月日时分
+    if (date >= thisYear) {
+      return date.toLocaleDateString('zh-CN', {
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+    
+    // 更早：显示年月日时分
     return date.toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: '2-digit',

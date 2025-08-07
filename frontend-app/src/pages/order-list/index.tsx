@@ -4,7 +4,7 @@ import Taro from '@tarojs/taro'
 import { useState, useCallback } from 'react'
 import { Order } from '../../types'
 import { OrderAPI } from '../../utils/api'
-import { MessageUtils } from '../../utils'
+import { MessageUtils, TimeUtils } from '../../utils'
 import './index.scss'
 
 const OrderList = () => {
@@ -122,7 +122,7 @@ const OrderList = () => {
                 <Text className="order-amount">¥{order.total_amount}</Text>
               </View>
               <Text className="order-time">
-                {new Date(order.created_at).toLocaleString()}
+                {TimeUtils.formatDate(order.created_at)}
               </Text>
             </View>
           ))}

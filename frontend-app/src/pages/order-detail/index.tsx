@@ -123,7 +123,7 @@ const OrderDetailPage = () => {
           <View className="info-row">
             <Text className="info-label">创建时间</Text>
             <Text className="info-value">
-              {new Date(order.created_at).toLocaleString('zh-CN')}
+              {TimeUtils.formatDate(order.created_at)}
             </Text>
           </View>
           
@@ -131,7 +131,7 @@ const OrderDetailPage = () => {
             <View className="info-row">
               <Text className="info-label">开始时间</Text>
               <Text className="info-value">
-                {new Date(order.start_time).toLocaleString('zh-CN')}
+                {TimeUtils.formatDate(order.start_time)}
               </Text>
             </View>
           )}
@@ -140,7 +140,7 @@ const OrderDetailPage = () => {
             <View className="info-row">
               <Text className="info-label">完成时间</Text>
               <Text className="info-value">
-                {new Date(order.complete_time).toLocaleString('zh-CN')}
+                {TimeUtils.formatDate(order.complete_time)}
               </Text>
             </View>
           )}

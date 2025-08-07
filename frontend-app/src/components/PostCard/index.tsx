@@ -2,6 +2,7 @@ import { View, Text, Image } from '@tarojs/components'
 import { AtIcon } from 'taro-ui'
 import React from 'react'
 import { Post } from '../../types'
+import { TimeUtils } from '../../utils'
 import './index.scss'
 
 interface PostCardProps {
@@ -66,7 +67,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, showDistance = false }) => {
             <Text className="stat-text">{post.view_count}</Text>
           </View>
         </View>
-        <Text className="post-time">{new Date(post.created_at).toLocaleDateString()}</Text>
+        <Text className="post-time">{TimeUtils.formatDate(post.created_at)}</Text>
       </View>
       
       {/* 模糊遮罩层 */}
