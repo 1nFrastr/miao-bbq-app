@@ -3,6 +3,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from .models import Post, PostImage, PostLike
 from .serializers import (
@@ -11,12 +12,20 @@ from .serializers import (
 )
 
 
+class PostPagination(PageNumberPagination):
+    """社区帖子分页器"""
+    page_size = 5  # 默认每页5条
+    page_size_query_param = 'page_size'
+    max_page_size = 20
+
+
 class PostViewSet(viewsets.ModelViewSet):
     """社区分享视图集"""
     serializer_class = PostSerializer
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['created_at', 'likes_count', 'view_count']
     ordering = ['-created_at']
+    pagination_class = PostPagination
     
     def get_queryset(self):
         """获取已审核通过的分享"""

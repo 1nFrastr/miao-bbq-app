@@ -241,7 +241,12 @@ export class CommunityAPI {
     ordering?: string
     page?: number
     page_size?: number
-  }) {
+  }): Promise<{
+    count: number
+    next: string | null
+    previous: string | null
+    results: any[]
+  }> {
     const queryStr = params ? '?' + new URLSearchParams(params as any).toString() : ''
     return request({
       url: `/community/posts/${queryStr}`,

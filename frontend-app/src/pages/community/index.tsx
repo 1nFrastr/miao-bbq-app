@@ -29,6 +29,8 @@ const Community = () => {
   const [posts, setPosts] = useState<Post[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
   
   // 排序状态
   const [currentSort, setCurrentSort] = useState<SortType>('distance')
@@ -52,13 +54,14 @@ const Community = () => {
   }, [currentSort])
 
   // 加载帖子列表
-  const loadPosts = useCallback(async (sortType: SortType = 'distance') => {
+  const loadPosts = useCallback(async (sortType: SortType = 'distance', page: number = 1, isRefresh: boolean = true) => {
     try {
       setIsLoading(true)
       
       let ordering = '-created_at' // 默认按创建时间倒序
       let params: any = {
-        page_size: 10
+        page_size: 5, // 修改为5条每页
+        page: page
       }
       
       // 根据排序类型设置参数
@@ -88,7 +91,17 @@ const Community = () => {
       const response = await CommunityAPI.getPosts(params)
       
       if (response.results) {
-        setPosts(response.results)
+        if (isRefresh || page === 1) {
+          // 如果是刷新或第一页，直接设置新数据
+          setPosts(response.results)
+        } else {
+          // 如果是加载更多，追加到现有数据
+          setPosts(prev => [...prev, ...response.results])
+        }
+        
+        // 更新分页状态
+        setHasMore(!!response.next)
+        setCurrentPage(page)
       }
     } catch (error) {
       console.error('加载帖子失败:', error)
@@ -101,8 +114,15 @@ const Community = () => {
   const checkLoginAndLoadPosts = useCallback(async () => {
     const loggedIn = AuthService.isLoggedIn()
     setIsLoggedIn(loggedIn)
-    await loadPosts(currentSort)
+    await loadPosts(currentSort, 1, true)
   }, [loadPosts, currentSort])
+
+  // 加载更多数据
+  const loadMorePosts = useCallback(async () => {
+    if (!hasMore || isLoading) return
+    
+    await loadPosts(currentSort, currentPage + 1, false)
+  }, [hasMore, isLoading, currentSort, currentPage, loadPosts])
 
   Taro.useDidShow(() => {
     checkLoginAndLoadPosts()
@@ -171,7 +191,9 @@ const Community = () => {
     }
     
     setCurrentSort(sortType)
-    await loadPosts(sortType)
+    setCurrentPage(1)
+    setHasMore(true)
+    await loadPosts(sortType, 1, true)
   }, [loadPosts])
 
   // 发布推荐
@@ -218,7 +240,9 @@ const Community = () => {
       })
       setLocationData(undefined)
       setSelectedImages([])
-      await loadPosts(currentSort)
+      setCurrentPage(1)
+      setHasMore(true)
+      await loadPosts(currentSort, 1, true)
       
     } catch (error) {
       console.error('发布失败:', error)
@@ -308,9 +332,26 @@ const Community = () => {
           <AtTabsPane current={currentTab} index={0}>
             <View className="posts-list">
               {posts && posts.length > 0 ? (
-                posts.map((post) => (
-                  <PostCard key={post.id} post={post} showDistance={true} />
-                ))
+                <>
+                  {posts.map((post) => (
+                    <PostCard key={post.id} post={post} showDistance={true} />
+                  ))}
+                  {hasMore && (
+                    <View 
+                      className="load-more-btn"
+                      onClick={loadMorePosts}
+                    >
+                      <Text className="load-more-text">
+                        {isLoading ? '加载中...' : '加载更多'}
+                      </Text>
+                    </View>
+                  )}
+                  {!hasMore && posts.length > 0 && (
+                    <View className="no-more-text">
+                      <Text>已加载全部内容</Text>
+                    </View>
+                  )}
+                </>
               ) : (
                 <View className="empty-posts">
                   <AtIcon value="message" size="32" color="#ccc" />
@@ -323,9 +364,26 @@ const Community = () => {
           <AtTabsPane current={currentTab} index={1}>
             <View className="posts-list">
               {posts && posts.length > 0 ? (
-                posts.map((post) => (
-                  <PostCard key={post.id} post={post} showDistance={false} />
-                ))
+                <>
+                  {posts.map((post) => (
+                    <PostCard key={post.id} post={post} showDistance={false} />
+                  ))}
+                  {hasMore && (
+                    <View 
+                      className="load-more-btn"
+                      onClick={loadMorePosts}
+                    >
+                      <Text className="load-more-text">
+                        {isLoading ? '加载中...' : '加载更多'}
+                      </Text>
+                    </View>
+                  )}
+                  {!hasMore && posts.length > 0 && (
+                    <View className="no-more-text">
+                      <Text>已加载全部内容</Text>
+                    </View>
+                  )}
+                </>
               ) : (
                 <View className="empty-posts">
                   <AtIcon value="message" size="32" color="#ccc" />
@@ -338,9 +396,26 @@ const Community = () => {
           <AtTabsPane current={currentTab} index={2}>
             <View className="posts-list">
               {posts && posts.length > 0 ? (
-                posts.map((post) => (
-                  <PostCard key={post.id} post={post} showDistance={false} />
-                ))
+                <>
+                  {posts.map((post) => (
+                    <PostCard key={post.id} post={post} showDistance={false} />
+                  ))}
+                  {hasMore && (
+                    <View 
+                      className="load-more-btn"
+                      onClick={loadMorePosts}
+                    >
+                      <Text className="load-more-text">
+                        {isLoading ? '加载中...' : '加载更多'}
+                      </Text>
+                    </View>
+                  )}
+                  {!hasMore && posts.length > 0 && (
+                    <View className="no-more-text">
+                      <Text>已加载全部内容</Text>
+                    </View>
+                  )}
+                </>
               ) : (
                 <View className="empty-posts">
                   <AtIcon value="message" size="32" color="#ccc" />
