@@ -110,6 +110,25 @@ export interface LocationPermission {
   requested: boolean
 }
 
+export interface LocationData {
+  latitude: number      // 纬度
+  longitude: number     // 经度
+  address: string       // 详细地址
+  isLocationEnabled: boolean  // 是否已获取位置
+}
+
+// 扩展后的表单数据结构
+export interface PostFormData {
+  shop_name: string
+  shop_location: string
+  shop_price: string
+  comment: string
+  // 新增位置字段
+  latitude?: number
+  longitude?: number
+  location_address?: string
+}
+
 // 图片上传类型
 export interface ImageFile {
   url: string

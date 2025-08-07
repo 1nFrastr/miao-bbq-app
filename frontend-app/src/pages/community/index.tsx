@@ -2,18 +2,12 @@ import { View, Text, Input, Textarea, Button } from '@tarojs/components'
 import { AtIcon } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import { useState, useCallback } from 'react'
-import { Post } from '../../types'
+import { Post, PostFormData, LocationData } from '../../types'
 import { CommunityAPI } from '../../utils/api'
 import { AuthService } from '../../utils/auth'
 import { ValidationUtils, MessageUtils } from '../../utils'
+import LocationPicker from '../../components/LocationPicker'
 import './index.scss'
-
-interface PostFormData {
-  shop_name: string
-  shop_location: string
-  shop_price: string
-  comment: string
-}
 
 const Community = () => {
   // 表单状态
@@ -23,6 +17,9 @@ const Community = () => {
     shop_price: '',
     comment: ''
   })
+  
+  // 位置状态
+  const [locationData, setLocationData] = useState<LocationData | undefined>()
   
   // 社区状态
   const [posts, setPosts] = useState<Post[]>([])
@@ -104,6 +101,11 @@ const Community = () => {
     })
   }, [])
 
+  // 处理位置变化
+  const handleLocationChange = useCallback((location: LocationData) => {
+    setLocationData(location)
+  }, [])
+
   // 发布推荐
   const handlePublish = useCallback(async () => {
     if (!isLoggedIn) {
@@ -122,7 +124,13 @@ const Community = () => {
         shop_name: formData.shop_name.trim(),
         shop_location: formData.shop_location.trim(),
         shop_price: parseFloat(formData.shop_price),
-        comment: formData.comment.trim()
+        comment: formData.comment.trim(),
+        // 添加位置信息
+        ...(locationData?.isLocationEnabled && {
+          latitude: locationData.latitude,
+          longitude: locationData.longitude,
+          location_address: locationData.address
+        })
       }
 
       await CommunityAPI.createPost(postData)
@@ -135,6 +143,7 @@ const Community = () => {
         shop_price: '',
         comment: ''
       })
+      setLocationData(undefined)
       await loadPosts()
       
     } catch (error) {
@@ -142,7 +151,7 @@ const Community = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [formData, isLoggedIn, validateForm, handleLogin, loadPosts])
+  }, [formData, locationData, isLoggedIn, validateForm, handleLogin, loadPosts])
 
   return (
     <View className="community-page">
@@ -170,6 +179,13 @@ const Community = () => {
               onInput={(e) => handleInputChange('shop_location', e.detail.value)}
             />
           </View>
+
+          {/* 位置选择器 */}
+          <LocationPicker
+            value={locationData}
+            onChange={handleLocationChange}
+            placeholder="获取当前位置"
+          />
 
           <View className="form-item">
             <Text className="form-label">人均消费 (元)</Text>

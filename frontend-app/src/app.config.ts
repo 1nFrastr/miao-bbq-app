@@ -36,5 +36,13 @@ export default {
         selectedIconPath: 'assets/images/user-active.png'
       }
     ]
-  }
+  },
+  permission: {
+    "scope.userLocation": {
+      desc: "您的位置信息将用于为您推荐附近的烧烤店"
+    }
+  },
+  requiredPrivateInfos: [
+    "getLocation"
+  ]
 }
