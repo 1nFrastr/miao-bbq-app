@@ -121,7 +121,7 @@ class PostUpdateSerializer(serializers.ModelSerializer):
 class PostListSerializer(serializers.ModelSerializer):
     """社区分享列表序列化器（简化版）"""
     user = UserSerializer(read_only=True)
-    first_image = serializers.SerializerMethodField()
+    images = PostImageSerializer(many=True, read_only=True)
     is_liked = serializers.SerializerMethodField()
     distance = serializers.SerializerMethodField()
     
@@ -130,13 +130,8 @@ class PostListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'shop_name', 'shop_location', 'shop_price',
             'comment', 'likes_count', 'view_count', 'created_at',
-            'first_image', 'is_liked', 'distance'
+            'images', 'is_liked', 'distance'
         ]
-    
-    def get_first_image(self, obj):
-        """获取第一张图片"""
-        first_image = obj.images.first()
-        return PostImageSerializer(first_image).data if first_image else None
     
     def get_is_liked(self, obj):
         """获取当前用户是否点赞"""

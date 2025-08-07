@@ -1,4 +1,4 @@
-import { View, Text, Input, Textarea, Image } from '@tarojs/components'
+import { View, Text, Input, Textarea } from '@tarojs/components'
 import { AtIcon, AtTabs, AtTabsPane } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import { useState, useCallback } from 'react'
@@ -8,6 +8,7 @@ import { AuthService } from '../../utils/auth'
 import { ValidationUtils, MessageUtils } from '../../utils'
 import LocationPicker from '../../components/LocationPicker'
 import ImageUploader from '../../components/ImageUploader'
+import PostCard from '../../components/PostCard'
 import './index.scss'
 
 const Community = () => {
@@ -321,60 +322,7 @@ const Community = () => {
             <View className="posts-list">
               {posts && posts.length > 0 ? (
                 posts.map((post) => (
-                  <View key={post.id} className="post-card">
-                    <View className="post-header">
-                      <View className="shop-info">
-                        <Text className="shop-name">{post.shop_name}</Text>
-                        <Text className="shop-location">
-                          <AtIcon value="map-pin" size="12" color="#999" />
-                          {post.shop_location}
-                          {post.distance && (
-                            <Text className="distance">距离 {(post.distance / 1000).toFixed(1)}km</Text>
-                          )}
-                        </Text>
-                      </View>
-                      <View className="shop-price">
-                        <Text className="price-text">¥{post.shop_price}</Text>
-                        <Text className="price-unit">/人</Text>
-                      </View>
-                    </View>
-                    
-                    {/* 图片展示 */}
-                    {post.images && post.images.length > 0 && (
-                      <View className="post-images">
-                        {post.images.slice(0, 3).map((img) => (
-                          <View key={img.id} className="image-item">
-                            <Image 
-                              className="post-image" 
-                              src={img.image_url} 
-                              mode="aspectFill"
-                            />
-                          </View>
-                        ))}
-                        {post.images.length > 3 && (
-                          <View className="more-images">
-                            <Text className="more-text">+{post.images.length - 3}</Text>
-                          </View>
-                        )}
-                      </View>
-                    )}
-                    
-                    <Text className="post-comment">{post.comment}</Text>
-                    
-                    <View className="post-footer">
-                      <View className="post-stats">
-                        <View className="stat-item">
-                          <AtIcon value={post.is_liked ? "heart-2" : "heart"} size="14" color={post.is_liked ? "#ff4757" : "#999"} />
-                          <Text className="stat-text">{post.likes_count}</Text>
-                        </View>
-                        <View className="stat-item">
-                          <AtIcon value="eye" size="14" color="#999" />
-                          <Text className="stat-text">{post.view_count}</Text>
-                        </View>
-                      </View>
-                      <Text className="post-time">{new Date(post.created_at).toLocaleDateString()}</Text>
-                    </View>
-                  </View>
+                  <PostCard key={post.id} post={post} showDistance={true} />
                 ))
               ) : (
                 <View className="empty-posts">
@@ -389,57 +337,7 @@ const Community = () => {
             <View className="posts-list">
               {posts && posts.length > 0 ? (
                 posts.map((post) => (
-                  <View key={post.id} className="post-card">
-                    <View className="post-header">
-                      <View className="shop-info">
-                        <Text className="shop-name">{post.shop_name}</Text>
-                        <Text className="shop-location">
-                          <AtIcon value="map-pin" size="12" color="#999" />
-                          {post.shop_location}
-                        </Text>
-                      </View>
-                      <View className="shop-price">
-                        <Text className="price-text">¥{post.shop_price}</Text>
-                        <Text className="price-unit">/人</Text>
-                      </View>
-                    </View>
-                    
-                    {/* 图片展示 */}
-                    {post.images && post.images.length > 0 && (
-                      <View className="post-images">
-                        {post.images.slice(0, 3).map((img) => (
-                          <View key={img.id} className="image-item">
-                            <Image 
-                              className="post-image" 
-                              src={img.image_url} 
-                              mode="aspectFill"
-                            />
-                          </View>
-                        ))}
-                        {post.images.length > 3 && (
-                          <View className="more-images">
-                            <Text className="more-text">+{post.images.length - 3}</Text>
-                          </View>
-                        )}
-                      </View>
-                    )}
-                    
-                    <Text className="post-comment">{post.comment}</Text>
-                    
-                    <View className="post-footer">
-                      <View className="post-stats">
-                        <View className="stat-item">
-                          <AtIcon value={post.is_liked ? "heart-2" : "heart"} size="14" color={post.is_liked ? "#ff4757" : "#999"} />
-                          <Text className="stat-text">{post.likes_count}</Text>
-                        </View>
-                        <View className="stat-item">
-                          <AtIcon value="eye" size="14" color="#999" />
-                          <Text className="stat-text">{post.view_count}</Text>
-                        </View>
-                      </View>
-                      <Text className="post-time">{new Date(post.created_at).toLocaleDateString()}</Text>
-                    </View>
-                  </View>
+                  <PostCard key={post.id} post={post} showDistance={false} />
                 ))
               ) : (
                 <View className="empty-posts">
@@ -454,57 +352,7 @@ const Community = () => {
             <View className="posts-list">
               {posts && posts.length > 0 ? (
                 posts.map((post) => (
-                  <View key={post.id} className="post-card">
-                    <View className="post-header">
-                      <View className="shop-info">
-                        <Text className="shop-name">{post.shop_name}</Text>
-                        <Text className="shop-location">
-                          <AtIcon value="map-pin" size="12" color="#999" />
-                          {post.shop_location}
-                        </Text>
-                      </View>
-                      <View className="shop-price">
-                        <Text className="price-text">¥{post.shop_price}</Text>
-                        <Text className="price-unit">/人</Text>
-                      </View>
-                    </View>
-                    
-                    {/* 图片展示 */}
-                    {post.images && post.images.length > 0 && (
-                      <View className="post-images">
-                        {post.images.slice(0, 3).map((img) => (
-                          <View key={img.id} className="image-item">
-                            <Image 
-                              className="post-image" 
-                              src={img.image_url} 
-                              mode="aspectFill"
-                            />
-                          </View>
-                        ))}
-                        {post.images.length > 3 && (
-                          <View className="more-images">
-                            <Text className="more-text">+{post.images.length - 3}</Text>
-                          </View>
-                        )}
-                      </View>
-                    )}
-                    
-                    <Text className="post-comment">{post.comment}</Text>
-                    
-                    <View className="post-footer">
-                      <View className="post-stats">
-                        <View className="stat-item">
-                          <AtIcon value={post.is_liked ? "heart-2" : "heart"} size="14" color={post.is_liked ? "#ff4757" : "#999"} />
-                          <Text className="stat-text">{post.likes_count}</Text>
-                        </View>
-                        <View className="stat-item">
-                          <AtIcon value="eye" size="14" color="#999" />
-                          <Text className="stat-text">{post.view_count}</Text>
-                        </View>
-                      </View>
-                      <Text className="post-time">{new Date(post.created_at).toLocaleDateString()}</Text>
-                    </View>
-                  </View>
+                  <PostCard key={post.id} post={post} showDistance={false} />
                 ))
               ) : (
                 <View className="empty-posts">
