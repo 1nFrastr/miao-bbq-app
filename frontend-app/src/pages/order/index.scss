@@ -354,6 +354,19 @@
     }
   }
 
+  &--disabled {
+    background: #e0e0e0;
+    
+    &:active {
+      background: #d0d0d0;
+    }
+    
+    .action-button__text,
+    .action-button__icon {
+      color: #999;
+    }
+  }
+
   &__text {
     font-size: 28rpx;
   }

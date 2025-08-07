@@ -369,22 +369,24 @@ const OrderPage = () => {
         
         <View className="action-buttons">
           <Button 
-            className="action-button action-button--primary"
+            className={`action-button ${currentOrder?.status === 'processing' ? 'action-button--disabled' : 'action-button--primary'}`}
             disabled={!currentOrder || currentOrder.status !== 'pending' || isLoading}
             loading={isLoading}
             onClick={handleStartTimer}
           >
-            <AtIcon value="clock" size="16" color="#fff" />
-            <Text className="action-button__text">开始计时</Text>
+            <AtIcon value="clock" size="16" color={currentOrder?.status === 'processing' ? "#999" : "#fff"} />
+            <Text className="action-button__text">
+              {currentOrder?.status === 'processing' ? '计时中...' : '开始计时'}
+            </Text>
           </Button>
           
           <Button 
-            className="action-button action-button--secondary"
+            className={`action-button ${currentOrder?.status === 'processing' ? 'action-button--primary' : 'action-button--secondary'}`}
             disabled={!currentOrder || currentOrder.status === 'completed' || isLoading}
             loading={isLoading}
             onClick={handleCompleteOrder}
           >
-            <AtIcon value="check" size="16" color="#fff" />
+            <AtIcon value="check" size="16" color={currentOrder?.status === 'processing' ? "#fff" : "#666"} />
             <Text className="action-button__text">完成订单</Text>
           </Button>
         </View>

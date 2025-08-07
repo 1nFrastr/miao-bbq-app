@@ -87,12 +87,6 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       // 5. 回调通知父组件
       onChange?.(locationData)
 
-      Taro.showToast({
-        title: '定位成功',
-        icon: 'success',
-        duration: 1500
-      })
-
     } catch (error: any) {
       console.error('获取位置失败:', error)
       
@@ -139,14 +133,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       <View className="location-picker__content">
         {!value?.isLocationEnabled ? (
           <AtButton
-            type="primary"
             size="small"
             loading={isLocating}
             disabled={disabled || isLocating}
             onClick={getCurrentLocation}
-            className="location-picker__button"
+            className={`location-picker__button ${isLocating ? 'location-picker__button--loading' : ''}`}
           >
-            <AtIcon value="map-pin" size="16" color="#fff" />
+            <AtIcon value="map-pin" size="16" color={isLocating ? "#d55a2b" : "#fff"} />
             <Text className="location-picker__button-text">
               {isLocating ? '定位中...' : placeholder}
             </Text>

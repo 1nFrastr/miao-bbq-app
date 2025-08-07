@@ -280,7 +280,7 @@ const Community = () => {
             <Textarea 
               className="form-textarea form-textarea--compact" 
               placeholder="推荐特色菜品、价格优势或服务体验等..." 
-              maxlength={500}
+              maxlength={300}
               value={formData.comment}
               onInput={(e) => handleInputChange('comment', e.detail.value)}
             />
