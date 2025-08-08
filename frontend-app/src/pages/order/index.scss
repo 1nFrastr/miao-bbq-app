@@ -204,8 +204,8 @@
   &__actions {
     display: flex;
     align-items: center;
-    gap: 12rpx;
-    flex-direction: column;
+    gap: 16rpx;
+    flex-direction: row;
   }
 
   &__total {
@@ -213,8 +213,7 @@
     color: #FF6B35;
     font-weight: 600;
     min-width: 80rpx;
-    text-align: center;
-    margin-bottom: 8rpx;
+    text-align: right;
   }
 
   &__controls {
@@ -226,24 +225,25 @@
 
 /* 数量输入框 */
 .quantity-input {
-  width: 160rpx;
+  width: 140rpx;
   
   .at-input-number {
     border: 1rpx solid #eee;
-    border-radius: 24rpx;
+    border-radius: 20rpx;
     background: #f8f8f8;
     overflow: hidden;
+    height: 56rpx;
     
     .at-input-number__btn {
-      width: 44rpx;
-      height: 44rpx;
+      width: 36rpx;
+      height: 36rpx;
       border-radius: 50%;
       background: #fff;
       border: 1rpx solid #FF6B35;
       color: #FF6B35;
-      font-size: 24rpx;
+      font-size: 20rpx;
       transition: all 0.2s ease;
-      margin: 6rpx;
+      margin: 10rpx 8rpx;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -270,14 +270,14 @@
     }
     
     .at-input-number__input {
-      font-size: 26rpx;
+      font-size: 24rpx;
       font-weight: 500;
       color: #333;
       text-align: center;
       border: none;
       background: transparent;
-      padding: 0 12rpx;
-      min-width: 60rpx;
+      padding: 0 8rpx;
+      min-width: 48rpx;
     }
   }
 }

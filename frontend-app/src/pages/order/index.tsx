@@ -363,28 +363,26 @@ const OrderPage = () => {
                   </Text>
                 </View>
                 <View className="order-item__actions">
+                  <AtInputNumber
+                    className="quantity-input"
+                    type="number"
+                    min={0}
+                    max={999}
+                    step={1}
+                    value={item.quantity}
+                    disabled={isLoading}
+                    onChange={(value) => handleQuantityChange(item.id, value, item.quantity)}
+                  />
                   <Text className="order-item__total">
                     ¥{(typeof item.subtotal === 'string' ? parseFloat(item.subtotal) : item.subtotal).toFixed(2)}
                   </Text>
-                  <View className="order-item__controls">
-                    <AtInputNumber
-                      className="quantity-input"
-                      type="number"
-                      min={0}
-                      max={999}
-                      step={1}
-                      value={item.quantity}
-                      disabled={isLoading}
-                      onChange={(value) => handleQuantityChange(item.id, value, item.quantity)}
-                    />
-                    <Button 
-                      className="delete-button"
-                      size="mini"
-                      onClick={() => handleRemoveItem(item.id)}
-                    >
-                      <AtIcon value="trash" size="12" color="#ff4757" />
-                    </Button>
-                  </View>
+                  <Button 
+                    className="delete-button"
+                    size="mini"
+                    onClick={() => handleRemoveItem(item.id)}
+                  >
+                    <AtIcon value="trash" size="12" color="#ff4757" />
+                  </Button>
                 </View>
               </View>
             ))
