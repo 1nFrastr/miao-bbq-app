@@ -16,7 +16,11 @@ const OrderPage = () => {
   
   // 订单状态
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isUpdatingQuantity, setIsUpdatingQuantity] = useState<Set<number>>(new Set())
+  const [isRemoving, setIsRemoving] = useState<Set<number>>(new Set())
+  const [isAddingItem, setIsAddingItem] = useState(false)
+  const [isStartingTimer, setIsStartingTimer] = useState(false)
+  const [isCompletingOrder, setIsCompletingOrder] = useState(false)
   const [timer, setTimer] = useState(0)
   const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null)
   
@@ -57,7 +61,6 @@ const OrderPage = () => {
     }
 
     try {
-      setIsLoading(true)
       const response = await OrderAPI.getOrders({
         ordering: '-created_at',
         page_size: 1
@@ -77,8 +80,6 @@ const OrderPage = () => {
       }
     } catch (error) {
       console.error('加载订单失败:', error)
-    } finally {
-      setIsLoading(false)
     }
   }, [])
 
@@ -133,7 +134,7 @@ const OrderPage = () => {
     }
 
     try {
-      setIsLoading(true)
+      setIsAddingItem(true)
       
       const itemData: OrderItemForm = {
         dish_name: dishName.trim(),
@@ -166,7 +167,7 @@ const OrderPage = () => {
     } catch (error) {
       console.error('添加菜品失败:', error)
     } finally {
-      setIsLoading(false)
+      setIsAddingItem(false)
     }
   }, [dishName, unitPrice, quantity, currentOrder, validateForm, loadCurrentOrder])
 
@@ -178,14 +179,18 @@ const OrderPage = () => {
     if (!confirmed) return
 
     try {
-      setIsLoading(true)
+      setIsRemoving(prev => new Set(prev).add(itemId))
       await OrderAPI.removeItem(currentOrder.id, itemId)
       await loadCurrentOrder()
       // 移除了烦人的成功提示
     } catch (error) {
       console.error('删除菜品失败:', error)
     } finally {
-      setIsLoading(false)
+      setIsRemoving(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(itemId)
+        return newSet
+      })
     }
   }, [currentOrder, loadCurrentOrder])
 
@@ -194,14 +199,18 @@ const OrderPage = () => {
     if (!currentOrder || newQuantity < 1) return
 
     try {
-      setIsLoading(true)
+      setIsUpdatingQuantity(prev => new Set(prev).add(itemId))
       await OrderAPI.updateItemQuantity(currentOrder.id, itemId, newQuantity)
       await loadCurrentOrder()
     } catch (error) {
       console.error('更新数量失败:', error)
       MessageUtils.showError('更新数量失败')
     } finally {
-      setIsLoading(false)
+      setIsUpdatingQuantity(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(itemId)
+        return newSet
+      })
     }
   }, [currentOrder, loadCurrentOrder])
 
@@ -226,14 +235,14 @@ const OrderPage = () => {
     if (!currentOrder) return
 
     try {
-      setIsLoading(true)
+      setIsStartingTimer(true)
       await OrderAPI.startTimer(currentOrder.id)
       await loadCurrentOrder()
       // 移除了烦人的成功提示
     } catch (error) {
       console.error('开始计时失败:', error)
     } finally {
-      setIsLoading(false)
+      setIsStartingTimer(false)
     }
   }, [currentOrder, loadCurrentOrder])
 
@@ -245,7 +254,7 @@ const OrderPage = () => {
     if (!confirmed) return
 
     try {
-      setIsLoading(true)
+      setIsCompletingOrder(true)
       await OrderAPI.completeOrder(currentOrder.id)
       
       // 清理计时器
@@ -261,7 +270,7 @@ const OrderPage = () => {
     } catch (error) {
       console.error('完成订单失败:', error)
     } finally {
-      setIsLoading(false)
+      setIsCompletingOrder(false)
     }
   }, [currentOrder, timerInterval])
 
@@ -335,8 +344,8 @@ const OrderPage = () => {
           
           <Button 
             className="add-button"
-            loading={isLoading}
-            disabled={isLoading}
+            loading={isAddingItem}
+            disabled={isAddingItem}
             onClick={handleAddItem}
           >
             <AtIcon value="add" size="16" color="#fff" />
@@ -370,7 +379,7 @@ const OrderPage = () => {
                     max={999}
                     step={1}
                     value={item.quantity}
-                    disabled={isLoading}
+                    disabled={isUpdatingQuantity.has(item.id)}
                     onChange={(value) => handleQuantityChange(item.id, value, item.quantity)}
                   />
                   <Text className="order-item__total">
@@ -379,6 +388,8 @@ const OrderPage = () => {
                   <Button 
                     className="delete-button"
                     size="mini"
+                    loading={isRemoving.has(item.id)}
+                    disabled={isRemoving.has(item.id)}
                     onClick={() => handleRemoveItem(item.id)}
                   >
                     <AtIcon value="trash" size="12" color="#ff4757" />
@@ -412,8 +423,8 @@ const OrderPage = () => {
         <View className="action-buttons">
           <Button 
             className={`action-button ${currentOrder?.status === 'processing' ? 'action-button--disabled' : 'action-button--primary'}`}
-            disabled={!currentOrder || currentOrder.status !== 'pending' || isLoading}
-            loading={isLoading}
+            disabled={!currentOrder || currentOrder.status !== 'pending' || isStartingTimer}
+            loading={isStartingTimer}
             onClick={handleStartTimer}
           >
             <AtIcon value="clock" size="16" color={currentOrder?.status === 'processing' ? "#999" : "#fff"} />
@@ -424,8 +435,8 @@ const OrderPage = () => {
           
           <Button 
             className={`action-button ${currentOrder?.status === 'processing' ? 'action-button--primary' : 'action-button--secondary'}`}
-            disabled={!currentOrder || currentOrder.status === 'completed' || isLoading}
-            loading={isLoading}
+            disabled={!currentOrder || currentOrder.status === 'completed' || isCompletingOrder}
+            loading={isCompletingOrder}
             onClick={handleCompleteOrder}
           >
             <AtIcon value="check" size="16" color={currentOrder?.status === 'processing' ? "#fff" : "#666"} />
