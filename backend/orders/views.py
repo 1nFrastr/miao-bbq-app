@@ -124,6 +124,38 @@ class OrderViewSet(viewsets.ModelViewSet):
         except OrderItem.DoesNotExist:
             return Response({'error': '菜品不存在'}, status=status.HTTP_404_NOT_FOUND)
     
+    @action(detail=True, methods=['post'])
+    def update_item(self, request, pk=None):
+        """更新菜品数量"""
+        order = self.get_object()
+        if order.status == 'completed':
+            return Response({'error': '已完成的订单不能修改菜品'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        item_id = request.data.get('item_id')
+        quantity = request.data.get('quantity')
+        
+        if not item_id or not quantity:
+            return Response({'error': '缺少item_id或quantity参数'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            quantity = int(quantity)
+            if quantity < 1:
+                return Response({'error': '数量必须大于0'}, status=status.HTTP_400_BAD_REQUEST)
+        except (ValueError, TypeError):
+            return Response({'error': '数量必须是有效的整数'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            order_item = order.orderitem_set.get(id=item_id)
+            order_item.quantity = quantity
+            order_item.save()
+            
+            # 更新订单统计
+            order.calculate_total()
+            
+            return Response(OrderItemSerializer(order_item).data)
+        except OrderItem.DoesNotExist:
+            return Response({'error': '菜品不存在'}, status=status.HTTP_404_NOT_FOUND)
+    
     @action(detail=False, methods=['get'])
     def statistics(self, request):
         """订单统计"""

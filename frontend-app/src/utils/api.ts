@@ -152,6 +152,18 @@ export class OrderAPI {
     })
   }
 
+  // 更新菜品数量
+  static async updateItemQuantity(orderId: number, itemId: number, quantity: number) {
+    return request({
+      url: `/orders/orders/${orderId}/update_item/`,
+      method: 'POST',
+      data: {
+        item_id: itemId,
+        quantity: quantity
+      }
+    })
+  }
+
   // 获取订单统计
   static async getStatistics() {
     return request({

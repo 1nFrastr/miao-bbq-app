@@ -1,5 +1,5 @@
 import { View, Text, Input, Button } from '@tarojs/components'
-import { AtIcon } from 'taro-ui'
+import { AtIcon, AtInputNumber } from 'taro-ui'
 import Taro from '@tarojs/taro'
 import { useState, useCallback, useEffect } from 'react'
 import { Order, OrderItemForm } from '../../types'
@@ -189,6 +189,38 @@ const OrderPage = () => {
     }
   }, [currentOrder, loadCurrentOrder])
 
+  // 更新订单项数量
+  const handleUpdateQuantity = useCallback(async (itemId: number, newQuantity: number) => {
+    if (!currentOrder || newQuantity < 1) return
+
+    try {
+      setIsLoading(true)
+      await OrderAPI.updateItemQuantity(currentOrder.id, itemId, newQuantity)
+      await loadCurrentOrder()
+    } catch (error) {
+      console.error('更新数量失败:', error)
+      MessageUtils.showError('更新数量失败')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [currentOrder, loadCurrentOrder])
+
+  // 处理数量变化
+  const handleQuantityChange = useCallback(async (itemId: number, newQuantity: number, oldQuantity: number) => {
+    if (newQuantity === oldQuantity) return
+    
+    if (newQuantity === 0) {
+      // 当数量变为0时，提示是否删除
+      const confirmed = await MessageUtils.showConfirm('删除菜品', '数量将变为0，是否要删除这个菜品？')
+      if (confirmed) {
+        handleRemoveItem(itemId)
+      }
+      // 如果用户取消删除，不做任何操作，AtInputNumber会保持原值
+    } else {
+      handleUpdateQuantity(itemId, newQuantity)
+    }
+  }, [handleUpdateQuantity, handleRemoveItem])
+
   // 开始计时
   const handleStartTimer = useCallback(async () => {
     if (!currentOrder) return
@@ -327,20 +359,32 @@ const OrderPage = () => {
                 <View className="order-item__info">
                   <Text className="order-item__name">{item.dish_name}</Text>
                   <Text className="order-item__price">
-                    ¥{(typeof item.unit_price === 'string' ? parseFloat(item.unit_price) : item.unit_price).toFixed(2)} × {item.quantity}
+                    ¥{(typeof item.unit_price === 'string' ? parseFloat(item.unit_price) : item.unit_price).toFixed(2)}
                   </Text>
                 </View>
                 <View className="order-item__actions">
                   <Text className="order-item__total">
                     ¥{(typeof item.subtotal === 'string' ? parseFloat(item.subtotal) : item.subtotal).toFixed(2)}
                   </Text>
-                  <Button 
-                    className="delete-button"
-                    size="mini"
-                    onClick={() => handleRemoveItem(item.id)}
-                  >
-                    <AtIcon value="trash" size="12" color="#ff4757" />
-                  </Button>
+                  <View className="order-item__controls">
+                    <AtInputNumber
+                      className="quantity-input"
+                      type="number"
+                      min={0}
+                      max={999}
+                      step={1}
+                      value={item.quantity}
+                      disabled={isLoading}
+                      onChange={(value) => handleQuantityChange(item.id, value, item.quantity)}
+                    />
+                    <Button 
+                      className="delete-button"
+                      size="mini"
+                      onClick={() => handleRemoveItem(item.id)}
+                    >
+                      <AtIcon value="trash" size="12" color="#ff4757" />
+                    </Button>
+                  </View>
                 </View>
               </View>
             ))

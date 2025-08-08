@@ -175,7 +175,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24rpx 0;
+  padding: 28rpx 0;
   border-bottom: 1rpx solid #f0f0f0;
 
   &:last-child {
@@ -184,6 +184,7 @@
 
   &__info {
     flex: 1;
+    margin-right: 16rpx;
   }
 
   &__name {
@@ -203,19 +204,87 @@
   &__actions {
     display: flex;
     align-items: center;
-    gap: 16rpx;
+    gap: 12rpx;
+    flex-direction: column;
   }
 
   &__total {
     font-size: 28rpx;
     color: #FF6B35;
     font-weight: 600;
+    min-width: 80rpx;
+    text-align: center;
+    margin-bottom: 8rpx;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+  }
+}
+
+/* 数量输入框 */
+.quantity-input {
+  width: 160rpx;
+  
+  .at-input-number {
+    border: 1rpx solid #eee;
+    border-radius: 24rpx;
+    background: #f8f8f8;
+    overflow: hidden;
+    
+    .at-input-number__btn {
+      width: 44rpx;
+      height: 44rpx;
+      border-radius: 50%;
+      background: #fff;
+      border: 1rpx solid #FF6B35;
+      color: #FF6B35;
+      font-size: 24rpx;
+      transition: all 0.2s ease;
+      margin: 6rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      &:active {
+        transform: scale(0.9);
+      }
+      
+      &--plus {
+        background: #FF6B35;
+        color: #fff;
+        
+        &:active {
+          background: #e55a2b;
+        }
+      }
+      
+      &:disabled {
+        opacity: 0.6;
+        background: #f5f5f5;
+        border-color: #ddd;
+        color: #ccc;
+      }
+    }
+    
+    .at-input-number__input {
+      font-size: 26rpx;
+      font-weight: 500;
+      color: #333;
+      text-align: center;
+      border: none;
+      background: transparent;
+      padding: 0 12rpx;
+      min-width: 60rpx;
+    }
   }
 }
 
 .delete-button {
-  width: 56rpx;
-  height: 56rpx;
+  width: 44rpx;
+  height: 44rpx;
   border-radius: 50%;
   background: transparent;
   border: none;
@@ -223,9 +292,11 @@
   align-items: center;
   justify-content: center;
   padding: 0;
+  font-size: 0;
   
   &:active {
     background: rgba(255, 71, 87, 0.1);
+    transform: scale(0.9);
     
     .at-icon {
       color: #ff4757 !important;
