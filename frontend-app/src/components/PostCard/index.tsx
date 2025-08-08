@@ -41,8 +41,13 @@ const PostCard: React.FC<PostCardProps> = ({ post, showDistance = false }) => {
           >
             <AtIcon value="map-pin" size="12" color="#007aff" />
             {post.location_address}
-            {showDistance && post.distance && (
-              <Text className="distance">距离 {(post.distance / 1000).toFixed(1)}km</Text>
+            {showDistance && post.distance !== undefined && post.distance !== null && (
+              <Text className="distance">
+                距离 {post.distance < 1000 
+                  ? `${post.distance}m` 
+                  : `${(post.distance / 1000).toFixed(1)}km`
+                }
+              </Text>
             )}
           </Text>
         </View>

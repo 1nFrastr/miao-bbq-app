@@ -11,7 +11,7 @@ export interface LocationData {
 
 export interface LocationPickerProps {
   value?: LocationData
-  onChange?: (location: LocationData) => void
+  onChange?: (location: LocationData | undefined) => void
   placeholder?: string
   disabled?: boolean
 }

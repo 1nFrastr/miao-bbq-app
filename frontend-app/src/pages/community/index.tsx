@@ -1,17 +1,21 @@
 import { View, Text, Input, Textarea } from '@tarojs/components'
 import { AtIcon, AtTabs, AtTabsPane } from 'taro-ui'
 import Taro from '@tarojs/taro'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Post, PostFormData, LocationData, SortType } from '../../types'
 import { CommunityAPI } from '../../utils/api'
 import { AuthService } from '../../utils/auth'
 import { ValidationUtils, MessageUtils, LocationUtils } from '../../utils'
+import { useUserLocation } from '../../hooks/useUserLocation'
 import LocationPicker from '../../components/LocationPicker'
 import ImageUploader from '../../components/ImageUploader'
 import PostCard from '../../components/PostCard'
 import './index.scss'
 
 const Community = () => {
+  // 用户位置管理
+  const { userLocation, isLoading: isLocationLoading, calculateDistance, refreshLocation, hasValidLocation } = useUserLocation()
+  
   // 表单状态
   const [formData, setFormData] = useState<PostFormData>({
     shop_name: '',
@@ -19,7 +23,7 @@ const Community = () => {
     comment: ''
   })
   
-  // 位置状态
+  // 位置状态 - 现在从全局位置状态中获取
   const [locationData, setLocationData] = useState<LocationData | undefined>()
   
   // 图片状态
@@ -40,6 +44,18 @@ const Community = () => {
     { title: '最热门' }
   ])
   const [currentTab, setCurrentTab] = useState(0)
+
+  // 同步全局位置状态到表单位置状态
+  useEffect(() => {
+    if (hasValidLocation && userLocation) {
+      setLocationData({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        address: userLocation.address,
+        isLocationEnabled: true
+      })
+    }
+  }, [hasValidLocation, userLocation])
 
   Taro.useLoad(() => {
     console.log('社区推荐页面加载')
@@ -67,12 +83,13 @@ const Community = () => {
       // 根据排序类型设置参数
       switch (sortType) {
         case 'distance':
-          // 如果有位置信息，按距离排序
-          if (locationData?.latitude && locationData?.longitude) {
-            params.lat = LocationUtils.formatLatitude(locationData.latitude)
-            params.lng = LocationUtils.formatLongitude(locationData.longitude)
+          // 如果有用户位置，使用用户位置按距离排序
+          if (hasValidLocation && userLocation?.latitude && userLocation?.longitude) {
+            params.lat = LocationUtils.formatLatitude(userLocation.latitude)
+            params.lng = LocationUtils.formatLongitude(userLocation.longitude)
             params.ordering = 'distance'
           } else {
+            // 没有位置信息时，按创建时间排序
             ordering = '-created_at'
           }
           break
@@ -91,12 +108,24 @@ const Community = () => {
       const response = await CommunityAPI.getPosts(params)
       
       if (response.results) {
+        // 为每个帖子计算距离（只有在有有效用户位置时）
+        const postsWithDistance = response.results.map(post => {
+          if (hasValidLocation && userLocation && post.latitude && post.longitude) {
+            const distance = calculateDistance(post.latitude, post.longitude)
+            return {
+              ...post,
+              distance: distance ? Math.round(distance * 1000) : undefined // 转换为米，计算失败时为undefined
+            }
+          }
+          return post
+        })
+        
         if (isRefresh || page === 1) {
           // 如果是刷新或第一页，直接设置新数据
-          setPosts(response.results)
+          setPosts(postsWithDistance)
         } else {
           // 如果是加载更多，追加到现有数据
-          setPosts(prev => [...prev, ...response.results])
+          setPosts(prev => [...prev, ...postsWithDistance])
         }
         
         // 更新分页状态
@@ -108,7 +137,7 @@ const Community = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [locationData])
+  }, [hasValidLocation, userLocation, calculateDistance])
 
   // 检查登录状态并加载帖子
   const checkLoginAndLoadPosts = useCallback(async () => {
@@ -172,6 +201,13 @@ const Community = () => {
   const handleLocationChange = useCallback((location: LocationData) => {
     setLocationData(location)
   }, [])
+
+  // 处理重新定位
+  const handleRefreshLocation = useCallback(async () => {
+    await refreshLocation()
+    // 重新定位后，刷新帖子列表
+    await loadPosts(currentSort, 1, true)
+  }, [refreshLocation, loadPosts, currentSort])
 
   // 处理tab切换
   const handleTabChange = useCallback(async (value: number) => {
@@ -321,7 +357,36 @@ const Community = () => {
       {/* 社区推荐列表 */}
       <View className="community-section">
         <View className="section-header">
-          <Text className="section-title">社区推荐</Text>
+          <View className="header-left">
+            <Text className="section-title">社区推荐</Text>
+            {hasValidLocation && userLocation && (
+              <Text className="location-info">
+                <AtIcon value="map-pin" size="12" color="#666" />
+                {userLocation.address}
+              </Text>
+            )}
+            {isLocationLoading && (
+              <Text className="location-info">
+                <AtIcon value="loading-3" size="12" color="#ff6b35" />
+                正在获取位置...
+              </Text>
+            )}
+            {!hasValidLocation && !isLocationLoading && (
+              <Text className="location-info location-info--error">
+                <AtIcon value="alert-circle" size="12" color="#ff6b35" />
+                位置获取失败，无法显示距离
+              </Text>
+            )}
+          </View>
+          <View className="header-right">
+            <View 
+              className={`refresh-location-btn ${isLocationLoading ? 'refresh-location-btn--loading' : ''}`}
+              onClick={isLocationLoading ? undefined : handleRefreshLocation}
+            >
+              <AtIcon value={isLocationLoading ? "loading-3" : "reload"} size="14" color="#007aff" />
+              <Text className="btn-text">{isLocationLoading ? '定位中...' : '重新定位'}</Text>
+            </View>
+          </View>
         </View>
         
         <AtTabs
