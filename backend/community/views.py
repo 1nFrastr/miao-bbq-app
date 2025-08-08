@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
+import math
 from .models import Post, PostImage, PostLike
 from .serializers import (
     PostSerializer, PostCreateSerializer, PostUpdateSerializer,
@@ -61,6 +62,63 @@ class PostViewSet(viewsets.ModelViewSet):
                 pass
         
         return queryset
+    
+    def calculate_distance(self, lat1, lng1, lat2, lng2):
+        """计算两点之间的距离（公里）"""
+        if not all([lat1, lng1, lat2, lng2]):
+            return float('inf')  # 如果位置信息不完整，返回无穷大
+        
+        R = 6371  # 地球半径（公里）
+        dlat = math.radians(lat2 - lat1)
+        dlng = math.radians(lng2 - lng1)
+        a = (math.sin(dlat/2) * math.sin(dlat/2) + 
+             math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * 
+             math.sin(dlng/2) * math.sin(dlng/2))
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        distance = R * c
+        return round(distance, 2)
+    
+    def list(self, request, *args, **kwargs):
+        """重写list方法，支持距离排序"""
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        # 检查是否需要按距离排序
+        ordering = request.query_params.get('ordering', '')
+        user_lat = request.query_params.get('lat')
+        user_lng = request.query_params.get('lng')
+        
+        if ordering == 'distance' and user_lat and user_lng:
+            try:
+                user_lat_f = float(user_lat)
+                user_lng_f = float(user_lng)
+                
+                # 使用数据库层面的距离计算和排序
+                # Haversine公式的SQL实现
+                queryset = queryset.extra(
+                    select={
+                        'distance': '''
+                            6371 * 2 * ASIN(SQRT(
+                                POWER(SIN((RADIANS(latitude) - RADIANS(%s)) / 2), 2) +
+                                COS(RADIANS(%s)) * COS(RADIANS(latitude)) *
+                                POWER(SIN((RADIANS(longitude) - RADIANS(%s)) / 2), 2)
+                            ))
+                        '''
+                    },
+                    select_params=[user_lat_f, user_lat_f, user_lng_f]
+                ).order_by('distance')
+                
+            except (ValueError, TypeError):
+                # 如果位置参数有问题，回退到普通查询
+                pass
+        
+        # 普通查询或距离排序后的查询都使用相同的分页逻辑
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
     def get_serializer_class(self):
         if self.action == 'list':

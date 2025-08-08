@@ -108,7 +108,7 @@ const Community = () => {
       const response = await CommunityAPI.getPosts(params)
       
       if (response.results) {
-        // 为每个帖子计算距离（只有在有有效用户位置时）
+        // 为每个帖子计算距离（只用于显示，不用于排序）
         const postsWithDistance = response.results.map(post => {
           if (hasValidLocation && userLocation && post.latitude && post.longitude) {
             const distance = calculateDistance(post.latitude, post.longitude)
