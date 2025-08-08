@@ -86,7 +86,7 @@ const OrderPage = () => {
   // 从订单开始计时
   const startTimerFromOrder = useCallback((order: Order) => {
     if (order.start_time) {
-      const startTime = new Date(order.start_time).getTime()
+      const startTime = TimeUtils.parseDate(order.start_time).getTime()
       const now = Date.now()
       const elapsed = Math.floor((now - startTime) / 1000)
       setTimer(elapsed)

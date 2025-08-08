@@ -102,6 +102,14 @@ export class LocationService {
 
 // 时间工具
 export class TimeUtils {
+  // 安全地解析日期字符串，兼容 iOS
+  static parseDate(timeString: string): Date {
+    // 将 "yyyy-MM-dd HH:mm:ss" 格式转换为 "yyyy/MM/dd HH:mm:ss" 格式
+    // iOS 只支持 "yyyy/MM/dd"、"yyyy/MM/dd HH:mm:ss"、"yyyy-MM-dd"、"yyyy-MM-ddTHH:mm:ss"、"yyyy-MM-ddTHH:mm:ss+HH:mm" 的格式
+    const isoTimeString = timeString.replace(/(\d{4})-(\d{2})-(\d{2})/, '$1/$2/$3')
+    return new Date(isoTimeString)
+  }
+
   // 格式化时间显示（分:秒）
   static formatTime(seconds: number): string {
     const mins = Math.floor(seconds / 60)
@@ -111,7 +119,7 @@ export class TimeUtils {
 
   // 格式化相对时间
   static formatRelativeTime(timeString: string): string {
-    const date = new Date(timeString)
+    const date = this.parseDate(timeString)
     const now = new Date()
     const diff = now.getTime() - date.getTime()
     const minutes = Math.floor(diff / 60000)
@@ -126,7 +134,7 @@ export class TimeUtils {
 
   // 智能格式化日期
   static formatDate(timeString: string): string {
-    const date = new Date(timeString)
+    const date = this.parseDate(timeString)
     const now = new Date()
     
     // 获取今天的开始时间（00:00:00）
