@@ -8,6 +8,10 @@ export default {
     // 虚拟定位开关，默认关闭
     USE_MOCK_LOCATION: JSON.stringify(process.env.TARO_APP_USE_MOCK_LOCATION === 'true')
   },
-  mini: {},
+  mini: {
+    // 解决 Zustand 5.0+ 版本在开发模式下的兼容性问题
+    // 参考: https://github.com/NervJS/taro/issues/17350
+    debugReact: true
+  },
   h5: {}
 } satisfies UserConfigExport<'vite'>
