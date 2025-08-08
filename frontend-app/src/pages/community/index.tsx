@@ -114,7 +114,7 @@ const Community = () => {
             const distance = calculateDistance(post.latitude, post.longitude)
             return {
               ...post,
-              distance: distance ? Math.round(distance * 1000) : undefined // 转换为米，计算失败时为undefined
+              distance: distance !== null ? Math.round(distance * 1000) : undefined // 转换为米，计算失败时为undefined
             }
           }
           return post
