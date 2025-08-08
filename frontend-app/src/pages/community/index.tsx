@@ -1,7 +1,7 @@
 import { View, Text, Input, Textarea } from '@tarojs/components'
 import { AtIcon, AtTabs, AtTabsPane } from 'taro-ui'
 import Taro from '@tarojs/taro'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { Post, PostFormData, LocationData, SortType } from '../../types'
 import { CommunityAPI } from '../../utils/api'
 import { AuthService } from '../../utils/auth'
@@ -35,6 +35,7 @@ const Community = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
+  const [hasInitialLoad, setHasInitialLoad] = useState(false) // 跟踪是否已进行初始加载
   
   // 排序状态
   const [currentSort, setCurrentSort] = useState<SortType>('distance')
@@ -44,6 +45,12 @@ const Community = () => {
     { title: '最热门' }
   ])
   const [currentTab, setCurrentTab] = useState(0)
+  
+  // 用于跟踪上一次位置状态的ref
+  const prevLocationState = useRef<{ hasValidLocation: boolean; isLocationLoading: boolean }>({
+    hasValidLocation: false,
+    isLocationLoading: true
+  })
 
   // 同步全局位置状态到表单位置状态
   useEffect(() => {
@@ -67,6 +74,7 @@ const Community = () => {
     const loggedIn = AuthService.isLoggedIn()
     setIsLoggedIn(loggedIn)
     await loadPosts(currentSort)
+    setHasInitialLoad(true) // 标记已完成初始加载
   }, [currentSort])
 
   // 加载帖子列表
@@ -139,11 +147,40 @@ const Community = () => {
     }
   }, [hasValidLocation, userLocation, calculateDistance])
 
+  // 监听位置状态变化，首次获取位置成功后重新加载帖子列表
+  useEffect(() => {
+    const prev = prevLocationState.current
+    
+    // 检查是否从位置加载中或无效状态变为有效状态
+    const shouldReload = (
+      hasInitialLoad && // 已完成初始加载
+      hasValidLocation && // 当前有有效位置
+      userLocation && // 有位置数据
+      !isLocationLoading && // 不在加载中
+      (
+        (!prev.hasValidLocation && hasValidLocation) || // 从无效变为有效
+        (prev.isLocationLoading && !isLocationLoading && hasValidLocation) // 从加载中变为加载完成且有效
+      )
+    )
+    
+    if (shouldReload) {
+      console.log('位置信息获取成功，重新加载帖子列表以计算距离')
+      loadPosts(currentSort, 1, true)
+    }
+    
+    // 更新ref中的状态
+    prevLocationState.current = {
+      hasValidLocation,
+      isLocationLoading
+    }
+  }, [hasValidLocation, userLocation, isLocationLoading, hasInitialLoad, currentSort, loadPosts])
+
   // 检查登录状态并加载帖子
   const checkLoginAndLoadPosts = useCallback(async () => {
     const loggedIn = AuthService.isLoggedIn()
     setIsLoggedIn(loggedIn)
     await loadPosts(currentSort, 1, true)
+    setHasInitialLoad(true) // 标记已完成初始加载
   }, [loadPosts, currentSort])
 
   // 加载更多数据
