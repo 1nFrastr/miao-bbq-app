@@ -7,11 +7,11 @@ A WeChat Mini Program developed with Taro + Django, providing BBQ ordering recor
 ## 📱 Feature Demo
 
 <div align="center">
-  <img src=".assets/images/order-page.gif" alt="Order recording feature demo" width="600"/>
+  <img src=".assets/images/order-page.gif" alt="Order recording feature demo"/>
   <br>
   <em>Order Recording Feature Demo</em>
   <br><br>
-  <img src=".assets/images/community-page.gif" alt="Community recommendation feature demo" width="600"/>
+  <img src=".assets/images/community-page.gif" alt="Community recommendation feature demo"/>
   <br>
   <em>Community Recommendation Feature Demo</em>
 </div>

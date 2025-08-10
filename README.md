@@ -7,11 +7,11 @@
 ## 📱 功能演示
 
 <div align="center">
-  <img src=".assets/images/order-page.gif" alt="点单记录功能演示" width="600"/>
+  <img src=".assets/images/order-page.gif" alt="点单记录功能演示"/>
   <br>
   <em>点单记录功能演示</em>
   <br><br>
-  <img src=".assets/images/community-page.gif" alt="社区推荐功能演示" width="600"/>
+  <img src=".assets/images/community-page.gif" alt="社区推荐功能演示"/>
   <br>
   <em>社区推荐功能演示</em>
 </div>
