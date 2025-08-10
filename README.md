@@ -4,6 +4,18 @@
 
 一款基于 Taro + Django 开发的微信小程序，为用户提供烧烤点单记录和社区推荐分享功能。
 
+## 📱 功能演示
+
+<div align="center">
+  <img src=".assets/images/order-page.gif" alt="点单记录功能演示" width="600"/>
+  <br>
+  <em>点单记录功能演示</em>
+  <br><br>
+  <img src=".assets/images/community-page.gif" alt="社区推荐功能演示" width="600"/>
+  <br>
+  <em>社区推荐功能演示</em>
+</div>
+
 ## 🍖 核心功能
 
 ### 📝 点单记录功能

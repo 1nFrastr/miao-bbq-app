@@ -4,6 +4,18 @@
 
 A WeChat Mini Program developed with Taro + Django, providing BBQ ordering records and community recommendation sharing features.
 
+## 📱 Feature Demo
+
+<div align="center">
+  <img src=".assets/images/order-page.gif" alt="Order recording feature demo" width="600"/>
+  <br>
+  <em>Order Recording Feature Demo</em>
+  <br><br>
+  <img src=".assets/images/community-page.gif" alt="Community recommendation feature demo" width="600"/>
+  <br>
+  <em>Community Recommendation Feature Demo</em>
+</div>
+
 ## 🍖 Core Features
 
 ### 📝 Ordering Record Function
