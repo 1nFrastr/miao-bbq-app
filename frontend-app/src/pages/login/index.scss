@@ -73,11 +73,24 @@
       opacity: 0.6;
       transform: none;
     }
+
+    &--disabled {
+      opacity: 0.5;
+      background-color: #ccc !important;
+      box-shadow: none;
+    }
   }
 
   &__agreement {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-top: 60rpx;
+    gap: 16rpx;
+  }
+
+  &__agreement-checkbox {
+    flex-shrink: 0;
   }
 
   &__agreement-text {
