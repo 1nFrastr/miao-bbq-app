@@ -59,19 +59,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
         console.log('处理后的位置数据:', poiData)
         onChange?.(poiData)
         
-        Taro.showToast({
-          title: '位置选择成功',
-          icon: 'success',
-          duration: 1500
-        })
+        // Taro.showToast({
+        //   title: '位置选择成功',
+        //   icon: 'success',
+        //   duration: 1500
+        // })
       }
     } catch (error) {
       console.error('选择地点失败:', error)
-      Taro.showToast({
-        title: '选择地点失败',
-        icon: 'error',
-        duration: 2000
-      })
+      // Taro.showToast({
+      //   title: '选择地点失败',
+      //   icon: 'error',
+      //   duration: 2000
+      // })
     }
   }, [onChange])
 
