@@ -301,4 +301,34 @@ export class LocationUtils {
     
     return rounded
   }
+
+  /**
+   * 解析地址信息，分离简略地址和详细地址
+   * 使用 || 作为分隔符
+   */
+  static parseAddress(address: string) {
+    if (address.includes('||')) {
+      const [simpleName, detailAddress] = address.split('||')
+      return {
+        simpleName: simpleName.trim(),
+        detailAddress: detailAddress.trim(),
+        displayAddress: simpleName.trim() // 在列表中显示简略地址
+      }
+    }
+    return {
+      simpleName: '',
+      detailAddress: address,
+      displayAddress: address // 没有分隔符时显示完整地址
+    }
+  }
+
+  /**
+   * 合并简略地址和详细地址
+   */
+  static combineAddress(simpleName: string, detailAddress: string): string {
+    if (simpleName && detailAddress) {
+      return `${simpleName}||${detailAddress}`
+    }
+    return detailAddress || simpleName || ''
+  }
 }

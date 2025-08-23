@@ -4,6 +4,7 @@ import Taro from '@tarojs/taro'
 import React, { useEffect, useCallback } from 'react'
 import { LocationPickerProps, LocationData } from './types'
 import { useUserLocation } from '../../hooks/useUserLocation'
+import { LocationUtils } from '../../utils'
 import './index.scss'
 
 const LocationPicker: React.FC<LocationPickerProps> = ({
@@ -40,10 +41,16 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       if (res) {
         console.log('chooseLocation 返回数据:', res)
         
+        // 使用 || 分隔符合并简略地址和详细地址
+        const combinedAddress = LocationUtils.combineAddress(
+          res.name || '',
+          res.address || '地址解析失败'
+        )
+        
         const poiData: LocationData = {
           latitude: res.latitude || 0,
           longitude: res.longitude || 0,
-          address: res.address || '地址解析失败',
+          address: combinedAddress,
           name: res.name || '未知地点',
           city: res.city ? String(res.city) : '',
           isLocationEnabled: true
@@ -148,10 +155,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
                 color="#52c41a" 
               />
               <View className="location-picker__address-content">
-                {value?.name && (
-                  <Text className="location-picker__poi-name">{value.name}</Text>
-                )}
-                <Text className="location-picker__address-text">{currentLocation.address}</Text>
+                {(() => {
+                  const addressInfo = LocationUtils.parseAddress(currentLocation.address)
+                  return (
+                    <>
+                      {addressInfo.simpleName && (
+                        <Text className="location-picker__poi-name">{addressInfo.simpleName}</Text>
+                      )}
+                      <Text className="location-picker__address-text">
+                        {addressInfo.detailAddress}
+                      </Text>
+                    </>
+                  )
+                })()}
               </View>
               {allowPOISelection && (
                 <View className="location-picker__manual-btn" onClick={handleChoosePOI}>

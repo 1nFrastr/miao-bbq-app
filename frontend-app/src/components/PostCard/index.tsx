@@ -2,7 +2,7 @@ import { View, Text, Image } from '@tarojs/components'
 import { AtIcon } from 'taro-ui'
 import React from 'react'
 import { Post } from '../../types'
-import { TimeUtils } from '../../utils'
+import { TimeUtils, LocationUtils } from '../../utils'
 import './index.scss'
 import Taro from '@tarojs/taro'
 
@@ -13,6 +13,10 @@ interface PostCardProps {
 
 const PostCard: React.FC<PostCardProps> = ({ post, showDistance = false }) => {
   const isBlurred = post.status !== 'approved'
+  
+  // 解析地址信息
+  const addressInfo = LocationUtils.parseAddress(post.location_address || '')
+  
   // 地址点击事件，打开系统导航
   const handleLocationClick = (e: any) => {
     e.stopPropagation && e.stopPropagation();
@@ -20,8 +24,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, showDistance = false }) => {
       Taro.openLocation({
         latitude: Number(post.latitude),
         longitude: Number(post.longitude),
-        name: post.shop_name,
-        address: post.location_address,
+        name: addressInfo.simpleName || post.shop_name, // 主标题：简略地址，如果没有则用店铺名
+        address: addressInfo.detailAddress, // 副标题：详细地址
         scale: 16
       })
     } else {
@@ -40,7 +44,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, showDistance = false }) => {
             style={{ cursor: 'pointer', color: '#007aff' }}
           >
             <AtIcon value="map-pin" size="12" color="#007aff" />
-            {post.location_address}
+            {addressInfo.displayAddress}
             {showDistance && typeof post.distance === 'number' && (
               <Text className="distance">
                 距离 {post.distance < 1000 
