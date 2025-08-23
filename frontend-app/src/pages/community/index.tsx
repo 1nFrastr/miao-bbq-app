@@ -271,8 +271,15 @@ const Community = () => {
 
   // 发布推荐
   const handlePublish = useCallback(async () => {
+    // 检查登录状态
     if (!isLoggedIn) {
-      await handleLogin()
+      const confirmed = await MessageUtils.showConfirm(
+        '请先登录',
+        '发布推荐需要登录账号，是否前往登录？'
+      )
+      if (confirmed) {
+        await handleLogin()
+      }
       return
     }
 

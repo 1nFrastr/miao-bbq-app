@@ -33,6 +33,139 @@
     }
   }
 
+  // 未登录状态样式
+  .not-logged-in {
+    .user-header {
+      background: linear-gradient(135deg, #FF6B35 0%, #FF8A65 100%);
+      padding: 60px 40px 40px;
+      color: white;
+
+      .user-info {
+        display: flex;
+        align-items: center;
+
+        .avatar {
+          width: 120px;
+          height: 120px;
+          border-radius: 60px;
+          background: rgba(255, 255, 255, 0.2);
+          margin-right: 30px;
+          position: relative;
+          overflow: hidden;
+
+          .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.3);
+          }
+        }
+
+        .user-details {
+          flex: 1;
+
+          .nickname {
+            display: block;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 8px;
+          }
+
+          .user-tip {
+            font-size: 26px;
+            opacity: 0.8;
+            color: rgba(255, 255, 255, 0.9);
+          }
+        }
+      }
+    }
+
+    .menu-section {
+      margin: 20px 0;
+      background: white;
+
+      // 为预览菜单项添加特殊样式
+      .at-list__item {
+        opacity: 0.7;
+        
+        .at-list__item-note {
+          color: #FF6B35;
+          font-size: 24px;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .login-guide {
+      background: white;
+      margin: 20px;
+      padding: 40px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid #f0f0f0;
+
+      .guide-title {
+        display: block;
+        font-size: 32px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 16px;
+      }
+
+      .guide-desc {
+        display: block;
+        font-size: 26px;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 40px;
+        padding: 0 20px;
+      }
+
+      .login-btn {
+        background: linear-gradient(135deg, #FF6B35 0%, #FF8A65 100%);
+        color: white;
+        padding: 28px 80px;
+        border-radius: 50px;
+        font-size: 32px;
+        font-weight: 600;
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3);
+        position: relative;
+        overflow: hidden;
+        transform: translateY(0);
+        transition: all 0.3s ease;
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+          transition: left 0.6s ease;
+        }
+
+        &:active {
+          transform: translateY(2px);
+          box-shadow: 0 3px 12px rgba(255, 107, 53, 0.4);
+          
+          &::before {
+            left: 100%;
+          }
+        }
+
+        .btn-text {
+          color: white;
+          position: relative;
+          z-index: 1;
+        }
+      }
+    }
+  }
+
   .user-header {
     background: linear-gradient(135deg, #FF6B35 0%, #FF8A65 100%);
     padding: 60px 40px 40px;

@@ -145,23 +145,68 @@ const My = () => {
     return colorMap[status as keyof typeof colorMap] || '#666'
   }
 
-  if (!isLoggedIn) {
-    return (
-      <View className="my-page">
-        <View className="login-prompt">
-          <AtIcon value="user" size="48" color="#ccc" />
-          <Text className="prompt-text">请先登录查看个人信息</Text>
-          <View className="login-btn" onClick={handleLogin}>
-            <Text className="btn-text">立即登录</Text>
-          </View>
-        </View>
-      </View>
-    )
-  }
-
   return (
     <View className="my-page">
-      {/* 用户信息头部 */}
+      {!isLoggedIn ? (
+        // 未登录状态 - 显示功能预览和登录引导
+        <View className="not-logged-in">
+          <View className="user-header">
+            <View className="user-info">
+              <View className="avatar">
+                <View className="avatar-placeholder">
+                  <AtIcon value="user" size="32" color="#fff" />
+                </View>
+              </View>
+              <View className="user-details">
+                <Text className="nickname">未登录用户</Text>
+                <Text className="user-tip">登录后查看完整功能</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* 功能菜单预览 */}
+          <View className="menu-section">
+            <AtList>
+              <AtListItem
+                title="我的订单"
+                note="登录后查看"
+                arrow="right"
+                iconInfo={{ value: 'list', color: '#FF6B35', size: 18 }}
+                onClick={() => {
+                  Taro.showToast({
+                    title: '请先登录查看我的订单',
+                    icon: 'none'
+                  })
+                }}
+              />
+              <AtListItem
+                title="我的推荐"
+                note="登录后查看"
+                arrow="right"
+                iconInfo={{ value: 'heart', color: '#FF6B35', size: 18 }}
+                onClick={() => {
+                  Taro.showToast({
+                    title: '请先登录查看我的推荐',
+                    icon: 'none'
+                  })
+                }}
+              />
+            </AtList>
+          </View>
+
+          {/* 登录引导 */}
+          <View className="login-guide">
+            <Text className="guide-title">体验更多功能</Text>
+            <Text className="guide-desc">登录后可以保存订单记录、发布推荐等</Text>
+            <View className="login-btn" onClick={handleLogin}>
+              <Text className="btn-text">立即登录</Text>
+            </View>
+          </View>
+        </View>
+      ) : (
+        // 已登录状态 - 显示完整功能
+        <>
+          {/* 用户信息头部 */}
       <View className="user-header">
         <View className="user-info">
           <View className="avatar">
@@ -252,6 +297,8 @@ const My = () => {
           </View>
         )}
       </View>
+        </>
+      )}
     </View>
   )
 }
