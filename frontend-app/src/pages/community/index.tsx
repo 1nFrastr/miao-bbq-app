@@ -353,6 +353,7 @@ const Community = () => {
             value={locationData}
             onChange={handleLocationChange}
             placeholder="获取当前位置"
+            allowPOISelection={true}
           />
 
           <View className="form-item">

@@ -114,6 +114,8 @@ export interface LocationData {
   longitude: number     // 经度
   address: string       // 详细地址
   isLocationEnabled: boolean  // 是否已获取位置
+  name?: string         // POI名称
+  city?: string         // 城市
 }
 
 // 扩展后的表单数据结构

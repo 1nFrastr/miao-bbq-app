@@ -44,6 +44,7 @@ export default {
     }
   },
   requiredPrivateInfos: [
-    "getLocation"
+    "getLocation",
+    "chooseLocation"
   ]
 }

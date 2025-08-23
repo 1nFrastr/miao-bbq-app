@@ -7,6 +7,8 @@ export interface LocationData {
   longitude: number     // 经度
   address: string       // 详细地址
   isLocationEnabled: boolean  // 是否已获取位置
+  name?: string         // POI名称
+  city?: string         // 城市
 }
 
 export interface LocationPickerProps {
@@ -14,4 +16,5 @@ export interface LocationPickerProps {
   onChange?: (location: LocationData | undefined) => void
   placeholder?: string
   disabled?: boolean
+  allowPOISelection?: boolean  // 是否允许POI选择
 }

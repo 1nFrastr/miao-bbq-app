@@ -14,6 +14,12 @@
     font-weight: normal;
   }
 
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+  }
+
   &__action {
     display: flex;
     align-items: center;
@@ -30,6 +36,12 @@
 
   &__content {
     margin-bottom: 16rpx;
+  }
+
+  &__buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 16rpx;
   }
 
   &__button {
@@ -59,6 +71,19 @@
       font-weight: 500;
     }
 
+    &--secondary {
+      background: #fff !important;
+      border: 2rpx solid #007aff !important;
+
+      &:active {
+        background: #f0f8ff !important;
+      }
+
+      .location-picker__button-text {
+        color: #007aff !important;
+      }
+    }
+
     &--loading {
       background: #fff !important;
       border: 2rpx solid #FF6B35 !important;
@@ -78,6 +103,7 @@
     border: 1rpx solid #bae7ff;
     border-radius: 8rpx;
     padding: 24rpx;
+    position: relative;
   }
 
   &__address {
@@ -85,12 +111,38 @@
     align-items: flex-start;
     margin-bottom: 12rpx;
 
-    &-text {
+    &-content {
       flex: 1;
+      margin-left: 12rpx;
+    }
+
+    &-text {
       font-size: 26rpx;
       color: #333;
-      margin-left: 12rpx;
       line-height: 1.5;
+    }
+  }
+
+  &__poi-name {
+    font-size: 28rpx;
+    color: #007aff;
+    font-weight: 600;
+    margin-bottom: 8rpx;
+    display: block;
+  }
+
+  &__poi-badge {
+    position: absolute;
+    top: 12rpx;
+    right: 12rpx;
+    background: #52c41a;
+    color: #fff;
+    padding: 4rpx 12rpx;
+    border-radius: 12rpx;
+    font-size: 20rpx;
+
+    &-text {
+      color: #fff;
     }
   }
 
