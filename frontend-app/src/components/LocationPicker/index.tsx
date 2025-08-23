@@ -89,20 +89,14 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     <View className="location-picker">
       <View className="location-picker__header">
         <Text className="location-picker__label">店铺位置</Text>
-        <View className="location-picker__actions">
-          {allowPOISelection && (
-            <View className="location-picker__action" onClick={handleChoosePOI}>
-              <AtIcon value="search" size="14" color="#007aff" />
-              <Text className="location-picker__action-text">选择位置</Text>
-            </View>
-          )}
-          {(hasValidLocation || currentLocation) && (
+        {(hasValidLocation || currentLocation) && (
+          <View className="location-picker__actions">
             <View className="location-picker__action" onClick={handleRefreshLocation}>
               <AtIcon value="reload" size="14" color="#007aff" />
               <Text className="location-picker__action-text">重新定位</Text>
             </View>
-          )}
-        </View>
+          </View>
+        )}
       </View>
 
       <View className="location-picker__content">
@@ -127,9 +121,9 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
                 onClick={handleChoosePOI}
                 className="location-picker__button location-picker__button--secondary"
               >
-                <AtIcon value="search" size="16" color="#007aff" />
+                <AtIcon value="map-pin" size="16" color="#007aff" />
                 <Text className="location-picker__button-text">
-                  选择地图位置
+                  手动选择
                 </Text>
               </AtButton>
             )}
@@ -159,15 +153,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
                 )}
                 <Text className="location-picker__address-text">{currentLocation.address}</Text>
               </View>
+              {allowPOISelection && (
+                <View className="location-picker__manual-btn" onClick={handleChoosePOI}>
+                  <AtIcon value="map-pin" size="18" color="#fff" />
+                  <Text className="location-picker__manual-btn-text">手动选择</Text>
+                </View>
+              )}
             </View>
-            <Text className="location-picker__coords">
-              经度: {currentLocation.longitude.toFixed(6)}, 纬度: {currentLocation.latitude.toFixed(6)}
-            </Text>
-            {value?.name && (
-              <View className="location-picker__poi-badge">
-                <Text className="location-picker__poi-badge-text">已选择地点</Text>
-              </View>
-            )}
           </View>
         ) : null}
       </View>
